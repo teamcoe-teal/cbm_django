@@ -1,0 +1,630 @@
+{% extends 'base.html' %} {% block content %}
+  
+{% load static %}  
+
+<header class="page-header" style="background-color:brown">
+      <h2>FFT Plot</h2>
+
+          
+          </header>
+
+{% csrf_token %}
+
+<div id='myDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
+
+<div id="showvalues" style="display:none">
+<div>
+    <input type="checkbox" class="Checked" id="cbbpfi" name="cbbpfi" value="cbbpfi" onchange="switchbpfi(this)">
+    <label for="cbbpfi" style="color:black">BPFI</label>
+    <input type="checkbox" class="Checked" id="cbbpfo" name="cbbpfo" value="cbbpfo" onchange="switchbpfi(this)">
+    <label for="cbbpfi"style="color:black">BPFO</label>
+   <input type="checkbox" class="Checked" id="cbbsf" name="cbbsf" value="cbbsf" onchange="switchbpfi(this)">
+    <label for="cbbpfi" style="color:black">BSF</label>
+  <input type="checkbox" class="Checked" id="cbftf" name="cbftf" value="cbftf" onchange="switchbpfi(this)">
+    <label for="cbbpfi" style="color:black">FTF</label>
+</div>
+<label style="color:black">BPFO :  <span id="bpfo"></span></label> <label style="color:black"> BPFI : <span id="bpfi"></span></label> <label style="color:black">BSF : <span id="bsf"></span></label> <label style="color:black">FTF : <span id="ftf"></span></label> 
+</div>
+
+</br>
+<div class="panel-body" style="display:none" id="showrawdata">
+	<form class="form-horizontal form-bordered" method="get">
+
+    <div id='rawdata'><!-- Plotly chart will be drawn inside this DIV --></div>
+
+  </form>
+</div>
+
+
+ <div class="" style="">
+         <button class="btn btn-primary" onclick="location.href = '/csvapp/upload'"> <span class="glyphicon glyphicon-circle-arrow-left" style="margin-right:5px;"></span>Cancel </button>
+          <button class="btn btn-primary" onclick="downloadresponsedata()"> <span class="glyphicon glyphicon-download"></span>Download CSV</button>
+          <button class="btn btn-primary" onclick="viewrawdata()"> <span class=""></span>View Raw Data</button>
+
+  </div> 
+  
+
+<script src="{% static 'assets/javascripts/plotly-latest.min.js' %}"></script>
+
+ 
+
+<script>
+//<!-- plotly -->
+window.onresize = function() {
+Plotly.Plots.resize(myDiv);
+};
+
+var mydata={{ fftdata | safe}}
+  
+  var obj = JSON.parse(JSON.stringify(mydata))
+  var fbpfo={{request.session.fbpfo}}
+  var fbpfi={{request.session.fbpfi}}
+  var fbsf={{request.session.fbsf}}
+  var fftf={{request.session.fftf}}
+  
+  document.getElementById('bpfo').innerText=fbpfo[0]
+  document.getElementById('bpfi').innerText=fbpfi[0]
+  document.getElementById('bsf').innerText=fbsf[0]
+  document.getElementById('ftf').innerText=fftf[0]
+
+  //var document.getElementById('bpfo').val=bpfo;
+  var Frequencies={};
+  var Amplitude = {};
+
+  var datalist=[];
+  var i=0;
+  for(var k in obj) {
+        if(obj[k] instanceof Object) {
+            datalist[i] = obj[k]
+
+            //alert(obj[k]);
+            //alert(datalist[i]);
+            i++;
+        } else {
+            document.write(obj[k] + "<br>");
+        };
+    }
+
+
+
+
+if(fbpfo != null)
+{
+ 
+ 
+  var x = document.getElementById("showvalues");
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  } 
+ 
+  var layout = {
+    title: {
+    text:'FFT',
+    font: {
+      family: 'Times New Roman',
+      size: 25
+    },
+    xref: 'paper',
+    x: 0.5,
+  },
+  xaxis: {
+    title: 'Frequency',
+    
+  },
+  yaxis: {
+    title: 'Amplitude',
+    
+  },
+  //plot_bgcolor:'rgba(178, 167, 201, 1)',
+	//title: 'Hide the Plotly Logo on the Modebar',
+  //paper_bgcolor:'rgba(178, 167, 201, 1)',
+  
+  shapes: []
+  
+	//showlegend= false
+};
+}
+else{
+ 
+var layout = {
+  title: {
+    text:'FFT',
+    font: {
+      family: 'Times New Roman',
+      size: 25
+    },
+    xref: 'paper',
+    x: 0.5,
+  },
+  xaxis: {
+    title: 'Frequency',
+    
+  },
+  yaxis: {
+    title: 'Amplitude',
+    
+  },
+  //plot_bgcolor:'rgba(178, 167, 201, 1)',
+	//title: 'Hide the Plotly Logo on the Modebar',
+  //paper_bgcolor:'rgba(178, 167, 201, 1)',
+  
+  
+  
+	//showlegend= false
+};
+}
+
+for(var i=0;i<fbpfo.length;i++){
+  
+    layout.shapes.push({
+    //line vertical
+   
+      type: 'line',
+      yref:'paper',
+      x0: fbpfo[i],
+      y0: 0,
+      x1: fbpfo[i],
+      y1: 1,
+      line: {
+        color: 'red',
+        width: 1
+      }
+    
+      },
+      
+    )
+}
+
+
+
+var trace1 = {
+  x: datalist[0],
+  y: datalist[1],
+  marker: {
+    color: 'rgb(55, 128, 191)',
+    size: 12,
+    line: {
+      color: 'red',
+      width: 0.5
+    }
+  },
+  type: 'scatter'
+};
+
+
+
+var data = [trace1];
+
+
+Plotly.newPlot('myDiv', data, layout, {displaylogo: false});
+
+
+
+</script>
+
+
+ <script>
+
+
+function viewrawdata(){
+  var x = document.getElementById("showrawdata");
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  } 
+      var mydata2={{ rawdata | safe}}
+  
+  var obj2 = JSON.parse(JSON.stringify(mydata2))
+  
+  //var document.getElementById('bpfo').val=bpfo;
+  var Frequencies={};
+  var Amplitude = {};
+
+  var datalist2=[];
+  var i=0;
+  for(var k in obj2) {
+        if(obj2[k] instanceof Object) {
+            datalist2[i] = obj2[k]
+
+            //alert(obj[k]);
+            //alert(datalist[i]);
+            i++;
+        } else {
+            document.write(obj2[k] + "<br>");
+        };
+    }
+
+
+{% comment %} Plotly.newPlot('myDiv', data); {% endcomment %}
+
+ 
+ 
+
+  if(datalist2[1] == null){
+    
+ var layout2 = {
+    title: {
+    text:'Raw Data',
+    font: {
+      family: 'Times New Roman',
+      size: 25
+    },
+    xref: 'paper',
+    x: 0.5,
+  },
+  xaxis: {
+    title: 'Amplitude(mm/sec2)',
+    
+  },
+  yaxis: {
+    title: 'Time(ms)',
+    
+  },
+  //plot_bgcolor:'rgba(178, 167, 201, 1)',
+	//title: 'Hide the Plotly Logo on the Modebar',
+  //paper_bgcolor:'rgba(178, 167, 201, 1)',
+  
+  
+  
+	//showlegend= false
+};
+}
+else{
+ 
+var layout2 = {
+  title: {
+    text:'Raw Data',
+    font: {
+      family: 'Times New Roman',
+      size: 25
+    },
+    xref: 'paper',
+    x: 0.5,
+  },
+  xaxis: {
+    title: 'Time(ms)',
+    
+  },
+  yaxis: {
+    title: 'Amplitude(mm/sec2)',
+    
+  },
+  //plot_bgcolor:'rgba(178, 167, 201, 1)',
+	//title: 'Hide the Plotly Logo on the Modebar',
+  //paper_bgcolor:'rgba(178, 167, 201, 1)',
+  
+  
+  
+	//showlegend= false
+};
+
+}
+
+
+
+if(datalist2[1]==null){
+  
+var trace2 = {
+  x: datalist2[1],
+  y: datalist2[0],
+  marker: {
+    color: 'rgb(55, 128, 191)',
+    size: 12,
+    line: {
+      color: 'red',
+      width: 0.5
+    }
+  },
+  type: 'scatter'
+};
+
+}
+else{
+ 
+  var trace2 = {
+  x: datalist2[1],
+  y: datalist2[0],
+  marker: {
+    color: 'rgb(55, 128, 191)',
+    size: 12,
+    line: {
+      color: 'red',
+      width: 0.5
+    }
+  },
+  type: 'scatter'
+};
+
+}
+
+var bpfo=null;
+var data2 = [trace2];
+
+
+Plotly.newPlot('rawdata', data2, layout2, {displaylogo: false,responsive:true});
+
+
+}
+
+
+
+
+function switchbpfi(element)
+{
+ var l1 = document.getElementById("cbbpfi");  
+  var l2 = document.getElementById("cbbpfo");  
+  var l3 = document.getElementById("cbbsf");  
+  var l4 = document.getElementById("cbftf");  
+  
+
+  var fbpfo = {{request.session.fbpfo}}
+  var fbpfi = {{request.session.fbpfi}}
+  var fbsf = {{request.session.fbsf}}
+  var fftf = {{request.session.fftf}}
+  var chekid=element.id
+
+  if(element.checked)
+  {
+   
+      if(fbpfo != null)
+        {
+
+  var layout = {
+    title: {
+    text:'Envelope with FFT',
+    font: {
+      family: 'Times new Roman',
+      size: 25
+    },
+    xref: 'paper',
+    x: 0.5,
+  },
+  xaxis: {
+    title: 'Frequency(Hz)',
+
+  },
+  yaxis: {
+    title: 'Amplitude(mm/sec2)',
+
+  },
+  //plot_bgcolor:'rgba(178, 167, 201, 1)',
+	//title: 'Hide the Plotly Logo on the Modebar',
+  //paper_bgcolor:'rgba(178, 167, 201, 1)',
+ shapes:[]
+
+};
+}
+else{
+
+var layout = {
+  title: {
+    text:'Envelope with FFT',
+    font: {
+      family: 'Times New Roman',
+      size: 25
+    },
+    xref: 'paper',
+    x: 0.5,
+  },
+  xaxis: {
+    title: 'Frequency(Hz)',
+
+  },
+  yaxis: {
+    title: 'Amplitude(mm/sec2)',
+
+  },
+  //plot_bgcolor:'rgba(178, 167, 201, 1)',
+	//title: 'Hide the Plotly Logo on the Modebar',
+  //paper_bgcolor:'rgba(178, 167, 201, 1)',
+
+
+
+	//showlegend= false
+};
+}
+
+if(l2.checked)
+{
+    for(var i=0;i<fbpfo.length;i++){
+
+    layout.shapes.push({
+    //line vertical
+
+      type: 'line',
+      yref:'paper',
+      x0: fbpfo[i],
+      y0: 0,
+      x1: fbpfo[i],
+      y1: 1,
+      line: {
+        color: 'red',
+        width: 1
+      }
+
+      },
+
+    )
+}
+
+}
+if(l1.checked)
+{
+    for(var i=0;i<fbpfi.length;i++){
+
+    layout.shapes.push({
+    //line vertical
+
+      type: 'line',
+      yref:'paper',
+      x0: fbpfi[i],
+      y0: 0,
+      x1: fbpfi[i],
+      y1: 1,
+      line: {
+        color: 'green',
+        width: 1
+      }
+
+      },
+
+    )
+}
+
+}
+
+if(l3.checked)
+{
+    for(var i=0;i<fbpfi.length;i++){
+
+    layout.shapes.push({
+    //line vertical
+
+      type: 'line',
+      yref:'paper',
+      x0: fbsf[i],
+      y0: 0,
+      x1: fbsf[i],
+      y1: 1,
+      line: {
+        color: 'black',
+        width: 1
+      }
+
+      },
+
+    )
+}
+
+}
+if(l4.checked)
+{
+    for(var i=0;i<fbpfi.length;i++){
+
+    layout.shapes.push({
+    //line vertical
+
+      type: 'line',
+      yref:'paper',
+      x0: fftf[i],
+      y0: 0,
+      x1: fftf[i],
+      y1: 1,
+      line: {
+        color: 'gold',
+        width: 1
+      }
+
+      },
+
+    )
+}
+
+}
+
+
+var trace1 = {
+  x: datalist[0],
+  y: datalist[1],
+  marker: {
+    color: 'rgb(55, 128, 191)',
+    size: 12,
+    line: {
+      color: 'red',
+      width: 0.5
+    }
+  },
+  type: 'scatter'
+};
+
+
+//alert(peaks)
+var data = [trace1];
+//Plotly.deleteTraces('myDiv', 0);
+Plotly.newPlot('myDiv', data, layout, {displaylogo: false,responsive:true});
+
+    }
+
+  
+}
+
+  
+function downloadresponsedata(){
+   const mydata = {{ fftdata|safe }};
+  var obj = JSON.parse(JSON.stringify(mydata))
+
+
+  var datalist=[];
+  var i=0;
+  for(var k in obj) {
+        if(obj[k] instanceof Object) {
+            datalist[i] = obj[k]
+            i++;
+        } else {
+            document.write(obj[k] + "<br>");
+        };
+    }
+  var amplitude = []
+  var frequencies=[]
+  var ampfreq=[]
+  amplitude=datalist[0].toString();
+  frequencies= datalist[1].toString();
+ 
+  //var csvFileData = [  
+   //datalist[0]
+//];  
+
+
+var emptylist=[]
+var emptylist1=[]
+for(var i=0;i<datalist[0].length;i++)
+{
+  
+  emptylist[i]=datalist[0][i]+','+datalist[1][i]+'\n';
+  
+  
+}
+
+var emptylist1 = emptylist.join('')
+
+var csvFileData = [  
+  
+   emptylist1
+];  
+//console.log(csvFileData)
+
+
+ 
+//create a user-defined function to download CSV file   
+
+
+     //define the heading for each row of the data  
+    var csv = 'Frequency,Amplitude\n';  
+     
+    //merge the data with CSV  
+    csvFileData.forEach(function(row) {  
+            csv+=row;
+            csv += "\n";  
+            
+    });  
+   
+  
+
+    //display the created CSV data on the web browser   
+    //document.write(csv);  
+  
+     
+    var hiddenElement = document.createElement('a');  
+    hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);  
+    hiddenElement.target = '_blank';  
+      
+    //provide the name for the CSV file to be downloaded  
+    hiddenElement.download = 'fftdata.csv';  
+    hiddenElement.click();   
+
+}
+  
+  
+
+</script>
+
+{% endblock%}

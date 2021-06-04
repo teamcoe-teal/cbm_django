@@ -1,0 +1,508 @@
+{% extends 'base.html' %} {% block content %}
+
+
+{% csrf_token %}
+
+<header class="page-header" style="background-color:brown">
+      <h2>CSV Upload</h2>
+
+          
+          </header>
+
+<div class="form-group">
+    <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label" style="color:white">Choose an Option: </label>
+    <div class="col-md-8">
+        
+<select name="cars" id="cars">
+ <option value="">Select</option>
+  <option value="withtimebfc">Amplitude and Time</option>
+  
+  <option value="withouttimebfc">Amplitude</option>
+  
+</select>
+           </div>                    
+</div>
+
+
+
+
+
+
+<div id="withtimebfc" style="display:none">
+<form name="form" action="/csvapp/upload_csv/" method="POST" enctype="multipart/form-data" class="form-horizontal"> 
+
+{% csrf_token %}
+<div class="form-group">
+    <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label" style="color:black">File: </label>
+    <div class="col-md-8">
+        <input type="file" name="file1" id="filewt" required="True" class="form-control">
+    </div>                    
+</div>
+<div class="form-group">
+    <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label" style="color:black">RPM: </label>
+    <div class="col-md-8">
+        <input type="number" step=any name="rpm" id="rpm" required="True" class="form-control">
+    </div>                    
+</div>
+ <div class="form-group text-left" style="padding-left:200px">
+            
+            <input type="checkbox" id="modno" name="modno" value="modno" onchange="toggleCheckbox(this)">
+            <label  for="modno" style="color:black">Model No</label> 
+            
+
+
+
+            <input type="checkbox" id="dim" name="dim" value="dim" onchange="toggleCheckbox1(this)">
+            <label  for="dim" style="color:black">Other Dimensions</label>
+</div>
+<div class="form-group" id="showmodelno" style="display:none">
+			<label class="col-md-3 control-label" style="color:black">ModelNo:</label>
+				<div class="col-md-6">
+                    <input type="text" name="modelno" id="modelno" required="false" class="form-control">
+				
+                    {% comment %} <select id="modelno" class="form-control" name="modelno" required="false">
+                    <option value="">Select</option>
+                    <option value="6205-2RS JEM SKF">6205-2RS JEM SKF</option>
+                    <option value="6203-2RS JEM SKF">6203-2RS JEM SKF</option>
+                    <option value="Rexnord 2115">Rexnord 2115</option>
+                    <option value="61804-2RZ SKF">61804-2RZ SKF</option>
+                    </select> {% endcomment %}
+				</div>
+		</div>
+
+<div id="showotherparameters" style="display:none">
+         
+<div class="form-group">
+    <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label" style="color:black">No of Rolling Elements: </label>
+    <div class="col-md-8">
+        <input type="number" name="n" id="nb" required="True" class="form-control">
+    </div>                    
+</div>
+
+<div class="form-group">
+    <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label" style="color:black">Inner Diameter: </label>
+    <div class="col-md-8 input-group mb-md">
+        <input type="number" step=any name="inner" id="inner" required="True" class="form-control">
+        <span class="input-group-addon">mm/inches </span>
+    </div>                    
+</div>
+
+<div class="form-group">
+    <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label" style="color:black">Outer Diameter: </label>
+    <div class="col-md-8 input-group mb-md">
+        <input type="number" step=any name="outer" id="outer" required="True" class="form-control">
+        <span class="input-group-addon">mm/inches </span>
+    </div>                    
+</div>
+
+<div class="form-group">
+    <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label" style="color:black">Ball Diameter: </label>
+    <div class="col-md-8 input-group mb-md">
+        <input type="number" step=any name="bd" id="bd" required="True" class="form-control">
+        <span class="input-group-addon">mm/inches </span>
+    </div>                    
+</div>
+<div class="form-group">
+    <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label" style="color:black">Contact Angle: </label>
+    <div class="col-md-8 input-group mb-md">
+        <input type="number"  step=any name="angle" id="angle" required="True" class="form-control">
+        <span class="input-group-addon">degrees </span>
+    </div>                    
+</div>
+</div>
+<div class="form-group">                    
+    <div class="col-md-3 col-sm-3 col-xs-12 col-md-offset-3" style="margin-bottom:10px;">
+         <button class="btn btn-primary" onclick="checkfunctionwithtime()"> <span class="glyphicon glyphicon-upload" style="margin-right:5px;"></span>Upload </button>
+    </div> 
+</div>
+</form>
+</div>
+
+{% comment %} <div class="form-group" id="withouttime" style="display:none">
+    <label for="myCheck">Include Bearing Frequencies:</label> 
+    <input type="checkbox" id="myCheck" onclick="checkoruncheck()">
+</div> {% endcomment %}
+
+<div id="withouttimebfc" style="display:none">
+<form name="form" action="/csvapp/upload_withouttime/" method="POST" enctype="multipart/form-data" class="form-horizontal"> 
+
+{% csrf_token %}
+<div class="form-group">
+    <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label" style="color:black">File: </label>
+    <div class="col-md-8">
+        <input type="file" name="file" id="filewt" required="True" class="form-control">
+    </div>                    
+</div>
+
+<div class="form-group">
+    <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label" style="color:black">Sampling Frequency: </label>
+    <div class="col-md-8">
+        <input type="number" step=any name="sampfreq" id="sampfreq1" required="True" class="form-control">
+    </div>                    
+</div>
+<div class="form-group">
+    <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label" style="color:black">RPM: </label>
+    <div class="col-md-8">
+        <input type="number" step=any name="rpm" id="rpm1" required="True" class="form-control">
+    </div>                    
+</div>
+
+ <div class="form-group text-left" style="padding-left:200px">
+            <input type="checkbox" id="modno" name="modno" value="modno" onchange="toggleCheckboxnotime(this)">
+            <label for="modno" style="color:black">Model No</label><br>
+            <input type="checkbox" id="dim" name="dim" value="dim" onchange="toggleCheckboxnotime1(this)">
+            <label for="dim" style="color:black">Other Dimensions</label><br>
+    </div>
+        <div class="form-group" id="showmodelno1" style="display:none">
+			<label class="col-md-3 control-label" style="color:black">ModelNo:</label>
+				<div class="col-md-6">
+                    <input type="text" name="modelno" id="modelno1" required="false" class="form-control">
+					
+				</div>
+		</div>
+        
+
+<div id="showotherparameters1" style="display:none">
+<div class="form-group">
+    <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label" style="color:black">No of Rolling Elements: </label>
+    <div class="col-md-8">
+        <input type="number" name="n" id="nb1" required="True" class="form-control">
+    </div>                    
+</div>
+
+<div class="form-group">
+    <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label" style="color:black">Inner Diameter: </label>
+    <div class="col-md-8 input-group mb-md">
+        <input type="number" step=any name="inner" id="inner1" required="True" class="form-control">
+        <span class="input-group-addon">mm/inches </span>
+    </div>                    
+</div>
+
+<div class="form-group">
+    <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label" style="color:black">Outer Diameter: </label>
+    <div class="col-md-8 input-group mb-md">
+        <input type="number" step=any name="outer" id="outer1" required="True" class="form-control">
+        <span class="input-group-addon">mm/inches </span>
+    </div>                    
+</div>
+
+<div class="form-group">
+    <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label" style="color:black">Ball Diameter: </label>
+    <div class="col-md-8 input-group mb-md">
+        <input type="number" step=any name="bd" id="bd1" required="True" class="form-control">
+        <span class="input-group-addon">mm/inches </span>
+    </div>                    
+</div>
+<div class="form-group">
+    <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label" style="color:black">Contact Angle: </label>
+    <div class="col-md-8 input-group mb-md">
+        <input type="number" step=any name="angle" id="angle1" required="True" class="form-control">
+        <span class="input-group-addon">degrees </span>
+    </div>                    
+</div>
+
+</div>
+
+
+<div class="form-group">                    
+    <div class="col-md-3 col-sm-3 col-xs-12 col-md-offset-3" style="margin-bottom:10px;">
+         <button class="btn btn-primary" onclick="checkfunctionwithoutime()"> <span class="glyphicon glyphicon-upload" style="margin-right:5px;"></span>Upload </button>
+    </div> 
+</div>
+</form>
+</div>
+
+
+<canvas id="chart" height="90"></canvas>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.7.1.min.js"></script>
+
+{% comment %} <script src="{% static '/assets/javascripts/chart.min.js' %}"></script> {% endcomment %}
+{% comment %} <script src="{% static 'assets/vendor/modernizr/modernizr.js' %}"></script> {% endcomment %}
+  
+<script>
+    {% if messages %}
+        {% for message in messages %}
+            
+            alert('{{message}}')
+        {% endfor %}
+    {% endif %}
+$('select').on('change', function() {
+      
+       var a = $(this).val()
+       var b="withtimebfc"
+       
+       var d="withouttimebfc"
+     
+       
+        if (a==b) {
+            
+           
+           $('#withtimebfc').show();
+           $('#withouttimebfc').hide();
+           
+       }
+       
+       else if(a==d)
+       {
+          
+           $('#withtimebfc').hide();
+           $('#withouttimebfc').show();
+           
+           
+       }
+       else
+       { 
+           
+           $('#withtimebfc').hide();
+            
+            $('#withouttimebfc').hide();
+           
+
+       }
+})
+
+
+
+  function amplitudewithbfc()
+  {
+       var sampfreq = $('sampfreq').val();
+        var mydata={
+            "sampfreq":sampfreq
+        }
+    
+    $.ajax({
+       
+        url: '/csvapp/upload_withouttime/',
+        type: 'POST',
+        data: mydata,
+        contentType: false,
+        processData: false,
+        success: function (data, status, xhr) {
+            //handle success    
+            alert("success")
+                    },
+        error: function (data, status, xhr) {
+            //handle error
+            alert(data)
+        }
+
+    });
+  }
+
+ 
+function sendfile()
+{
+    api_url = "http://127.0.0.1:8000/csvrestapi/"
+    alert("1");
+    var data_file = $("#filewt").val();
+    var data = {
+        'data': $("#filewt").val()
+    }
+    alert(data_file)
+    $.ajax({
+        url: api_url+'test/',
+        type: 'POST',
+        data: data,
+        contentType: false,
+        processData: false,
+        success: function (data, status, xhr) {
+            //handle success    
+            alert("success")
+                    },
+        error: function (data, status, xhr) {
+            //handle error
+            alert(data)
+        }
+
+    });
+}
+
+
+  
+
+function downloadimage(){
+
+ var link = document.createElement('a');
+  link.download = 'filename.png';
+  link.href = document.getElementById('canvas').toDataURL()
+  link.click();
+}
+
+function checkfunctionwithtime()
+{
+    var modelno = $('#modelno').val()
+    var nb = $('#nb').val()
+    
+    if(modelno.length > 0 ){
+        
+        $("#nb").hide().prop('required',false);
+		$("#inner").hide().prop('required',false);
+        $("#outer").hide().prop('required',false);
+		$("#bd").hide().prop('required',false);
+        $("#angle").hide().prop('required',false);
+		
+	}
+    if(nb.length > 0) {
+        
+       
+        $("#modelno").hide().prop('required',false);
+    }
+
+    if(modelno.length == "" && nb.length == ""){
+
+        
+        $("#nb").hide().prop('required',false);
+		$("#inner").hide().prop('required',false);
+        $("#outer").hide().prop('required',false);
+		$("#bd").hide().prop('required',false);
+        $("#angle").hide().prop('required',false);
+        $("#modelno").hide().prop('required',false);
+    }
+   
+    
+}
+
+
+function checkfunctionwithoutime()
+{
+    
+    var modelno1 = $('#modelno1').val()
+    var nb1 = $('#nb1').val()
+    if(modelno1.length>0){
+
+       
+	
+        $("#nb1").hide().prop('required',false);
+		$("#inner1").hide().prop('required',false);
+        $("#outer1").hide().prop('required',false);
+		$("#bd1").hide().prop('required',false);
+        $("#angle1").hide().prop('required',false);
+		
+	}
+    if (nb1.length>0){
+        
+        
+        $("#modelno1").hide().prop('required',false);
+    }
+
+    if(modelno1.length == "" && nb1.length == ""){
+
+        
+        $("#nb1").hide().prop('required',false);
+		$("#inner1").hide().prop('required',false);
+        $("#outer1").hide().prop('required',false);
+		$("#bd1").hide().prop('required',false);
+        $("#angle1").hide().prop('required',false);
+        $("#modelno1").hide().prop('required',false);
+    }
+   
+    
+}
+
+
+
+function toggleCheckbox(element)
+{
+    
+   if(element.checked){
+
+     $('#showmodelno').show()
+     $("#modelno").show().prop('required',false);
+   }
+   else{
+       $('#showmodelno').hide()
+       $("#modelno").hide().prop('required',false);
+   }
+
+}
+
+function toggleCheckbox1(element)
+{
+    
+   if(element.checked){
+     $('#showotherparameters').show()
+      $("#nb").show().prop('required',false);
+		$("#inner").show().prop('required',false);
+        $("#outer").show().prop('required',false);
+		$("#bd").show().prop('required',false);
+        $("#angle").show().prop('required',false);
+   }
+   else{
+       $('#showotherparameters').hide()
+       
+        $("#nb").hide().prop('required',false);
+		$("#inner").hide().prop('required',false);
+        $("#outer").hide().prop('required',false);
+		$("#bd").hide().prop('required',false);
+        $("#angle").hide().prop('required',false);
+   }
+
+}
+
+
+function toggleCheckboxnotime(element)
+{
+    
+   if(element.checked){
+
+     $('#showmodelno1').show()
+     $("#modelno1").show().prop('required',false);
+   }
+   else{
+       $('#showmodelno1').hide()
+       $("#modelno1").hide().prop('required',false);
+   }
+
+}
+
+function toggleCheckboxnotime1(element)
+{
+    
+   if(element.checked){
+     $('#showotherparameters1').show()
+      $("#nb1").show().prop('required',false);
+		$("#inner1").show().prop('required',false);
+        $("#outer1").show().prop('required',false);
+		$("#bd1").show().prop('required',false);
+        $("#angle1").show().prop('required',false);
+   }
+   else{
+       $('#showotherparameters1').hide()
+       
+        $("#nb1").hide().prop('required',false);
+		$("#inner1").hide().prop('required',false);
+        $("#outer1").hide().prop('required',false);
+		$("#bd1").hide().prop('required',false);
+        $("#angle1").hide().prop('required',false);
+   }
+
+}
+
+{% comment %} function checkoruncheck() {
+ 
+  // Get the checkbox
+  var checkBox = document.getElementById("myCheck");
+  var text = document.getElementById("withouttimebfc");
+  //alert(checkBox.checked)
+
+  // If the checkbox is checked, display the output text
+  if (checkBox.checked == true){
+    
+    //text.style.display = "block";
+    $('#withouttimebfc').show();
+    $('#withouttime').hide();
+    
+  } else {
+       alert("inside else")
+    //text.style.display = "none";
+    //$('#withouttimebfc').hide();
+    $('#withouttimenobfc').hide();
+    $('#withouttimebfc').show();
+    //$('#withouttime').hide();
+  }
+} {% endcomment %}
+</script>
+
+{% endblock %}
+

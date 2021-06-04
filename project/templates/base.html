@@ -1,0 +1,391 @@
+{% load static %} (% load staticfiles %)
+<html class="fixed sidebar-left-collapsed js flexbox flexboxlegacy csstransforms csstransforms3d no-overflowscrolling no-mobile-device custom-scroll">
+
+<head>
+
+    <!-- Basic -->
+    <meta charset="UTF-8">
+
+    <title>DASHBOARD|TEAL</title>
+    <meta name="keywords" content="HTML5 Admin Template">
+    <meta name="description" content="Porto Admin - Responsive HTML5 Template">
+    <meta name="author" content="okler.net">
+
+    <!-- Mobile Metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- Web Fonts  -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800|Shadows+Into+Light" rel="stylesheet" type="text/css">
+
+    <!-- Vendor CSS -->
+    <link rel="stylesheet" href="{% static 'assets/vendor/bootstrap/css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/vendor/font-awesome/css/font-awesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/vendor/magnific-popup/magnific-popup.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/vendor/bootstrap-datepicker/css/datepicker3.css' %}">
+
+    <!-- Theme CSS -->
+    <link rel="stylesheet" href="{% static 'assets/stylesheets/theme.css' %}">
+
+    <!-- Skin CSS -->
+    <link rel="stylesheet" href="{% static 'assets/stylesheets/skins/default.css' %}">
+
+    <!-- Theme Custom CSS -->
+    <link rel="stylesheet" href="{% static 'assets/stylesheets/theme-custom.css' %}">
+
+    <!-- Head Libs -->
+    <script src="{% static 'assets/vendor/modernizr/modernizr.js' %}"></script>
+
+</head>
+
+<body>
+    <section class="body" style="background-color:rosybrown">
+
+        <!-- start: header -->
+        <header class="header" style="background-color:purple">
+            <div class="logo-container" style="background-color:purple">
+                <a href="../" class="logo">
+                    <img src="{% static 'assets/images/TEAL.png' %}" height="35" alt="Porto Admin">
+                </a>
+                <div class="visible-xs toggle-sidebar-left" data-toggle-class="sidebar-left-opened" data-target="html" data-fire-event="sidebar-left-opened">
+                    <i class="fa fa-bars" aria-label="Toggle sidebar"></i>
+                </div>
+            </div>
+            <div class="fc-header-center">
+                <div class="">
+                    <h1 class="title text-uppercase text-bold m-none" style="padding-right:200px;padding-top:20px;height:0px;color:black;text-align:center;font-size:20px" ;><i class=""></i> Condition Based Monitoring System </h1>
+
+                </div>
+            </div>
+           
+        </header>
+        <!-- end: header -->
+
+        <div class="inner-wrapper">
+            <!-- start: sidebar -->
+            <aside id="sidebar-left" class="sidebar-left" style="background-color:black">
+
+                <div class="sidebar-header">
+                    <div class="sidebar-title">
+                        Navigation
+                    </div>
+                    <div class="sidebar-toggle hidden-xs" data-toggle-class="sidebar-left-collapsed" data-target="html" data-fire-event="sidebar-left-toggle">
+                        <i class="fa fa-bars" aria-label="Toggle sidebar"></i>
+                    </div>
+                </div>
+
+                <div class="nano has-scrollbar">
+                    <div class="nano-content" tabindex="0" style="right: -17px;">
+                        <nav id="menu" class="nav-main" role="navigation">
+                            <ul class="nav nav-main">
+                                <li>
+                                    <a href="{% url 'Home' %}">
+                                               
+                                            
+                                        <i class="fa fa-home" aria-hidden="true"></i>
+                                        <span>Dashboard</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'Upload' %}">
+                                        <i class="fa fa-bar-chart-o" aria-hidden="true"></i>
+                                              <span>FFT</span>
+                                        </a>
+                                </li>
+                                 <li>
+                                    <a href="{% url 'Envelop' %}">
+                                        <i class="fa fa-bar-chart-o" aria-hidden="true"></i>
+                                              <span>Envelop</span>
+                                    </a>
+                                </li>
+                                                              
+                                {% comment %} <li class="nav-parent">
+                                    <a>
+                                        <i class="fa fa-copy" aria-hidden="true"></i>
+                                        <span>Pages</span>
+                                    </a>
+                                    <ul class="nav nav-children">
+                                         <li>
+                                            <a href="{% url 'Index' %}">
+                                                 Index
+                                            </a>
+                                        </li>
+                                         <li>
+                                            <a href="{% url 'Upload' %}">
+                                                 FFT 
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url 'Envelop' %}">
+                                                 Envelop 
+                                            </a>
+                                        </li>
+                                       
+                                       
+                                    </ul>
+                                </li>
+                                {% endcomment %}
+                                
+                                
+                                
+                               
+                                
+                               
+                            </ul>
+                        </nav>
+
+                        
+                       
+                    </div>
+
+                   
+                </div>
+
+            </aside>
+            <!-- end: sidebar -->
+
+            <section role="main" class="content-body">
+
+                <!-- start: page -->
+                <div class="row">
+                    {% block content %} {% endblock %}
+                </div>
+
+                <!-- end: page -->
+            </section>
+        </div>
+
+        <aside id="sidebar-right" class="sidebar-right">
+            <div class="nano has-scrollbar">
+                <div class="nano-content" tabindex="0" style="right: -17px;">
+                    <a href="#" class="mobile-close visible-xs">
+                        Collapse <i class="fa fa-chevron-right"></i>
+                    </a>
+
+                    <div class="sidebar-right-wrapper">
+
+                        <div class="sidebar-widget widget-calendar">
+                            <h6>Upcoming Tasks</h6>
+                            <div data-plugin-datepicker="" data-plugin-skin="dark">
+                                <div class="datepicker datepicker-inline datepicker-dark">
+                                    <div class="datepicker-days" style="display: block;">
+                                        <table class=" table-condensed">
+                                            <thead>
+                                                <tr>
+                                                    <th class="prev" style="visibility: visible;">«</th>
+                                                    <th colspan="5" class="datepicker-switch">March 2021</th>
+                                                    <th class="next" style="visibility: visible;">»</th>
+                                                </tr>
+                                                <tr>
+                                                    <th class="dow">Su</th>
+                                                    <th class="dow">Mo</th>
+                                                    <th class="dow">Tu</th>
+                                                    <th class="dow">We</th>
+                                                    <th class="dow">Th</th>
+                                                    <th class="dow">Fr</th>
+                                                    <th class="dow">Sa</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="old day">28</td>
+                                                    <td class="day">1</td>
+                                                    <td class="day">2</td>
+                                                    <td class="day">3</td>
+                                                    <td class="day">4</td>
+                                                    <td class="day">5</td>
+                                                    <td class="day">6</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="day">7</td>
+                                                    <td class="day">8</td>
+                                                    <td class="day">9</td>
+                                                    <td class="day">10</td>
+                                                    <td class="day">11</td>
+                                                    <td class="day">12</td>
+                                                    <td class="day">13</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="day">14</td>
+                                                    <td class="day">15</td>
+                                                    <td class="day">16</td>
+                                                    <td class="day">17</td>
+                                                    <td class="day">18</td>
+                                                    <td class="day">19</td>
+                                                    <td class="day">20</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="day">21</td>
+                                                    <td class="day">22</td>
+                                                    <td class="day">23</td>
+                                                    <td class="day">24</td>
+                                                    <td class="day">25</td>
+                                                    <td class="day">26</td>
+                                                    <td class="day">27</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="day">28</td>
+                                                    <td class="day">29</td>
+                                                    <td class="day">30</td>
+                                                    <td class="day">31</td>
+                                                    <td class="new day">1</td>
+                                                    <td class="new day">2</td>
+                                                    <td class="new day">3</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="new day">4</td>
+                                                    <td class="new day">5</td>
+                                                    <td class="new day">6</td>
+                                                    <td class="new day">7</td>
+                                                    <td class="new day">8</td>
+                                                    <td class="new day">9</td>
+                                                    <td class="new day">10</td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <th colspan="7" class="today" style="display: none;">Today</th>
+                                                </tr>
+                                                <tr>
+                                                    <th colspan="7" class="clear" style="display: none;">Clear</th>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                    <div class="datepicker-months" style="display: none;">
+                                        <table class="table-condensed">
+                                            <thead>
+                                                <tr>
+                                                    <th class="prev" style="visibility: visible;">«</th>
+                                                    <th colspan="5" class="datepicker-switch">2021</th>
+                                                    <th class="next" style="visibility: visible;">»</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="7"><span class="month">Jan</span><span class="month">Feb</span><span class="month">Mar</span><span class="month">Apr</span><span class="month">May</span><span class="month">Jun</span><span class="month">Jul</span>
+                                                        <span class="month">Aug</span><span class="month">Sep</span><span class="month">Oct</span><span class="month">Nov</span><span class="month">Dec</span></td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <th colspan="7" class="today" style="display: none;">Today</th>
+                                                </tr>
+                                                <tr>
+                                                    <th colspan="7" class="clear" style="display: none;">Clear</th>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                    <div class="datepicker-years" style="display: none;">
+                                        <table class="table-condensed">
+                                            <thead>
+                                                <tr>
+                                                    <th class="prev" style="visibility: visible;">«</th>
+                                                    <th colspan="5" class="datepicker-switch">2020-2029</th>
+                                                    <th class="next" style="visibility: visible;">»</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="7"><span class="year old">2019</span><span class="year">2020</span><span class="year">2021</span><span class="year">2022</span><span class="year">2023</span><span class="year">2024</span><span class="year">2025</span>
+                                                        <span class="year">2026</span><span class="year">2027</span><span class="year">2028</span><span class="year">2029</span><span class="year new">2030</span></td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <th colspan="7" class="today" style="display: none;">Today</th>
+                                                </tr>
+                                                <tr>
+                                                    <th colspan="7" class="clear" style="display: none;">Clear</th>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <ul>
+                                <li>
+                                    <time datetime="2014-04-19T00:00+00:00">04/19/2014</time>
+                                    <span>Company Meeting</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="sidebar-widget widget-friends">
+                            <h6>Friends</h6>
+                            <ul>
+                                <li class="status-online">
+                                    <figure class="profile-picture">
+                                        <img src="{% static 'assets/images/!sample-user.jpg' %}" alt="Joseph Doe" class="img-circle">
+                                    </figure>
+                                    <div class="profile-info">
+                                        <span class="name">Joseph Doe Junior</span>
+                                        <span class="title">Hey, how are you?</span>
+                                    </div>
+                                </li>
+                                <li class="status-online">
+                                    <figure class="profile-picture">
+                                        <img src="{% static 'assets/images/!sample-user.jpg' %}" alt="Joseph Doe" class="img-circle">
+                                    </figure>
+                                    <div class="profile-info">
+                                        <span class="name">Joseph Doe Junior</span>
+                                        <span class="title">Hey, how are you?</span>
+                                    </div>
+                                </li>
+                                <li class="status-offline">
+                                    <figure class="profile-picture">
+                                        <img src="{% static 'assets/images/!sample-user.jpg' %}" alt="Joseph Doe" class="img-circle">
+                                    </figure>
+                                    <div class="profile-info">
+                                        <span class="name">Joseph Doe Junior</span>
+                                        <span class="title">Hey, how are you?</span>
+                                    </div>
+                                </li>
+                                <li class="status-offline">
+                                    <figure class="profile-picture">
+                                        <img src="{% static 'assets/images/!sample-user.jpg' %}" alt="Joseph Doe" class="img-circle">
+                                    </figure>
+                                    <div class="profile-info">
+                                        <span class="name">Joseph Doe Junior</span>
+                                        <span class="title">Hey, how are you?</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="nano-pane" style="display: block; opacity: 1; visibility: visible;">
+                    <div class="nano-slider" style="height: 462px; transform: translate(0px, 0px);"></div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Vendor -->
+        <script src="{% static 'assets/javascripts/jquery-1.7.1.min.js' %}"></script>
+        <script src="{% static 'assets/vendor/jquery/jquery.js' %}"></script>
+        
+        <script src="{% static 'assets/vendor/jquery-browser-mobile/jquery.browser.mobile.js' %}"></script>
+        <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.js' %}"></script>
+        <script src="{% static 'assets/vendor/nanoscroller/nanoscroller.js' %}"></script>
+        <script src="{% static 'assets/vendor/bootstrap-datepicker/js/bootstrap-datepicker.js' %}"></script>
+        <script src="{% static 'assets/vendor/magnific-popup/magnific-popup.js' %}"></script>
+        <script src="{% static 'assets/vendor/jquery-placeholder/jquery.placeholder.js' %}"></script>
+        
+        <!-- Specific Page Vendor -->
+
+        <!-- Theme Base, Components and Settings -->
+        <script src="{% static 'assets/javascripts/theme.js' %}"></script>
+
+        <!-- Theme Custom -->
+        <script src="{% static 'assets/javascripts/theme.custom.js' %}"></script>
+
+        <!-- Theme Initialization Files -->
+        <script src="{% static 'assets/javascripts/theme.init.js' %}"></script>
+
+    </section>
+
+</body>
+
+</html>
