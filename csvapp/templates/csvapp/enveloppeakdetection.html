@@ -26,7 +26,7 @@
 <div>
 <label for="typeoffault"  style="color:black">Fault Status</label>
 {% comment %} <span id="typeoffault"></span> {% endcomment %}
-<input type="text" class="" id="typeoffault" name="typeoffault" value="" readonly style="color:black">
+<input type="text" class="" size="75px" id="typeoffault" name="typeoffault" value="" readonly style="color:black">
     
 </div>
 <div>
@@ -96,21 +96,36 @@ var mydata={{ envelopdata | safe}}
   var fbsf = {{request.session.fbsf}}
   var fftf = {{request.session.fftf}}
  
-  if(fbpfo[0]!=''){
+
+
+  if(fbpfo[0]!= null){
     
   document.getElementById('bpfo').innerText=fbpfo[0]
   document.getElementById('typeoffault').value="Outer Fault Detected"
+ 
+    
+  
   }
   else{
+    
     var x = document.getElementById("bpfo");
     var y = document.getElementById("lbpfo1");
     x.style.display = "none";
     y.style.display="none";
   }
-  if(fbpfi != ''){
-    
+  if(fbpfi[0] != null){
   document.getElementById('bpfi').innerText=fbpfi[0]
-  document.getElementById('typeoffault').value="Inner Fault Detected"
+  var x=document.getElementById('typeoffault').value
+  
+      if(x != ''){
+        
+        var stringval = x +","+ "Inner Fault Detected"
+        document.getElementById('typeoffault').value= stringval
+      }
+    else{
+      
+      document.getElementById('typeoffault').value= "Inner Fault Detected";
+    }
   }
   else{
     
@@ -120,9 +135,17 @@ var mydata={{ envelopdata | safe}}
     y.style.display="none";
 
   }
-  if(fbsf!=''){
+  if(fbsf[0]!=null){
   document.getElementById('bsf').innerText=fbsf[0]
-  document.getElementById('typeoffault').value="Ball Fault Detected"
+  var x=document.getElementById('typeoffault').value
+  
+  if(x!=''){
+  var stringval = x + "Ball Fault Detected"
+  document.getElementById('typeoffault').value= stringval
+  }
+  else{
+    document.getElementById('typeoffault').value= "Ball Fault Detected"
+  }
   }
   else{
     var x = document.getElementById("bsf");
@@ -131,9 +154,16 @@ var mydata={{ envelopdata | safe}}
     y.style.display="none";
     
   }
-  if(fftf!=''){
+  if(fftf[0]!=null){
   document.getElementById('ftf').innerText=fftf[0]
-  document.getElementById('typeoffault').value="Cage Fault Detected"
+  var x=document.getElementById('typeoffault').value
+  if(x!=''){
+  var stringval = x + "Cage Fault Detected"
+  document.getElementById('typeoffault').value= stringval
+  }
+  else{
+    document.getElementById('typeoffault').value= "Cage Fault Detected"
+  }
   }
   else{
     var x = document.getElementById("ftf");
