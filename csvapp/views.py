@@ -18,8 +18,8 @@ from django.conf import settings
 from csvapp.forms import csvwithouttime
 
 # Create your views here.
-api_url = "http://127.0.0.1:8000/csvrestapi/"
-# api_url ="https://cbmapiteal.azurewebsites.net/csvrestapi/"
+# api_url = "http://127.0.0.1:8000/csvrestapi/"
+api_url ="https://cbmapiteal.azurewebsites.net/csvrestapi/"
 
 class Home(TemplateView):
 	template_name = "csvapp/home.html"
