@@ -89,10 +89,38 @@ var mydata={{ envelopdata | safe}}
   var fbpfi = {{request.session.fbpfi}}
   var fbsf = {{request.session.fbsf}}
   var fftf = {{request.session.fftf}}
+ 
+  if(fbpfo[0]!=''){
+    
   document.getElementById('bpfo').innerText=fbpfo[0]
+  }
+  else{
+    document.getElementById("bpfo").innerHTML="No outer fault";
+  }
+  if(fbpfi != ''){
+    
   document.getElementById('bpfi').innerText=fbpfi[0]
+  }
+  else{
+    
+    document.getElementById("bpfi").innerHTML="No inner fault";
+
+  }
+  if(fbsf!=''){
   document.getElementById('bsf').innerText=fbsf[0]
+  }
+  else{
+
+    document.getElementById("bsf").innerHTML="No ball fault";
+  }
+  if(fftf!=''){
   document.getElementById('ftf').innerText=fftf[0]
+  }
+  else{
+    document.getElementById("ftf").innerHTML="No cage fault";
+  }
+  
+  
 
 
   //alert(peaks.length())
@@ -112,7 +140,7 @@ var mydata={{ envelopdata | safe}}
 
 
 
-if(fbpfo != null)
+if(fbpfo != null || fbpfi != null || fbsf !=null || fftf != null)
 {
 
   var x = document.getElementById("showvalues");
@@ -254,7 +282,7 @@ var mydata1={{ enveloping | safe}}
     }
 
 {% comment %} Plotly.newPlot('myDiv', data); {% endcomment %}
-if(fbpfo != null)
+if(fbpfo != null || fbpfi != null || fbsf !=null || fftf != null)
 {
 
  var x = document.getElementById("showvalues");
@@ -531,7 +559,7 @@ function switchbpfi(element)
   if(element.checked)
   {
    
-      if(fbpfo != null)
+      if(fbpfo != null || fbpfi != null || fbsf !=null || fftf != null)
         {
 
   var layout = {
