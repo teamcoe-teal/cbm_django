@@ -18,8 +18,8 @@ from django.conf import settings
 from csvapp.forms import csvwithouttime
 
 # Create your views here.
-# api_url = "http://127.0.0.1:8000/csvrestapi/"
-api_url ="https://cbmapiteal.azurewebsites.net/csvrestapi/"
+api_url = "http://127.0.0.1:8000/csvrestapi/"
+# api_url ="https://cbmapiteal.azurewebsites.net/csvrestapi/"
 
 class Home(TemplateView):
 	template_name = "csvapp/home.html"
@@ -38,26 +38,23 @@ def upload_csv(request):
 	data = {}
    
 	if "GET" == request.method:
-		dbname=settings.DATABASE
-		print(dbname)
 		return render(request, "csvapp/upload.html", data)
 	if "POST" == request.method:
-		#Session.objects.all().delete()
+		
 		csv_file = request.FILES['file1']
 		
 		
-
+		##	check for file extension
 		if csv_file.name.endswith(".csv") != True:
 			messages.error(request,'File is not CSV type')
 			
 			return render(request, "csvapp/upload.html", data)
        
-
+		##	Read the csv file using pandas dataframe
 		csv=pd.read_csv(csv_file,error_bad_lines=False)
-		
-		
 		col=csv.columns.tolist()
 		col1=csv.columns.tolist()
+		## Get the column length
 		n=len(col)
 		noofcol=2
 		for i in range(len(col)):
@@ -66,48 +63,49 @@ def upload_csv(request):
 				ampindex= col[i]
 			if col1[i] == "time":
 				timeindex=col[i]
-		
 		iucolnames=['From','To']
 		colnames=['amplitude','time']
+		print(col)
 		if n < 2:
 			messages.error(request,'please upload proper csv file')			
 			return render(request, "csvapp/upload.html", data)
+		##  If the column contains From and To the uploaded file is IU generated file,set the nofocol as 3
 		if n !=2:
 			for word in iucolnames:
 				if not word in col:
-					print("no columns")
+					
 					messages.error(request,'Upload correct IU generated csv file.....[From],[To]')
-					return render(request, "csvapp/envelop.html", data)
+					return render(request, "csvapp/upload.html", data)
 			
 			noofcol=3 
 			if col[2] == 'From' and col[3]=='To':
-				noofcol = 3
-
-				
-				
+				noofcol = 3	
 			else:
 				messages.error(request,'Upload correct IU generated csv file')
 				return render(request, "csvapp/upload.html", data)
+		##  If the column contains Amplitude and time ,set the noofcol as 2
 		if n>0 and noofcol==2:
 			for word in colnames:
-				if not word in col:
+				if not word in col1:
 					print("no columns")
 					messages.error(request,'Upload correct csv file....[amplitude],[time]')
-					return render(request, "csvapp/envelop.html", data)
+					return render(request, "csvapp/upload.html", data)
 			
 			
 		
 
 		
-		#try:
 		
+		## Convert csv file json object to string
 		input_file1 = request.FILES.get(u'file1')
 		if input_file1:
-			#input_file_df1 = pd.read_csv(input_file1)
+			
 			df_json1 = json.dumps(csv.to_json(orient='records'))
 			
 		input_file_json = json.loads(df_json1)
 		df_in_first_api = pd.read_json(input_file_json)
+
+		##  Store raw data to plot the graph
 		if noofcol==3:
 			
 			
@@ -124,7 +122,7 @@ def upload_csv(request):
 			
 		
 				
-		#print(df_json1)
+		## get the remaining parameters
 
 		modelnoval=request.POST.get("modelno")
 		rpmval=request.POST.get("rpm")
@@ -144,9 +142,7 @@ def upload_csv(request):
 		if innerval is "" or innerval is None:
 			
 			inner=""
-		
-		else:
-			
+		else:	
 			rpm = float(rpmval)
 		
 			nb = int(nval)
@@ -155,19 +151,25 @@ def upload_csv(request):
 			bd = float(bdval)
 			angle = float(angleval)
 		
-		
+		## API Call with url and payload
+
 		url = api_url + "upload_csv/"
-		payload = {"noofcol":noofcol,"input_file":df_json1,"modelno":modelno,"rpm":rpm,"nb":"null","inner":"null","outer":"null","bd":"null","angle":"null"}
+		payload = {"noofcol":noofcol,"input_file":df_json1,"modelno":modelno,"rpm":rpm,
+		"nb":"null","inner":"null","outer":"null","bd":"null","angle":"null"}
 		if inner!="":
 		
-			payload = {"noofcol":noofcol,"input_file":df_json1,"modelno":modelno,"rpm":rpm,"nb":nb,"inner":inner,"outer":outer,"bd":bd,"angle":angle}
+			payload = {"noofcol":noofcol,"input_file":df_json1,"modelno":modelno,"rpm":rpm,
+			"nb":nb,"inner":inner,"outer":outer,"bd":bd,"angle":angle}
 	
 		
 		url_response = requests.post(url, data = payload)
+
+		## store the json result
 		fftdata1=url_response.json()
 		
 		fftdata3={"Frequencies":fftdata1['Frequencies'],"Amplitude":fftdata1['Amplitude']}
-	
+
+		##store bearing frequencies in sessions
 		request.session['BPFO'] = fftdata1['BPFO']
 		request.session['BPFI']= fftdata1['BPFI']
 		request.session['BSF']= fftdata1['BSF']
@@ -175,7 +177,7 @@ def upload_csv(request):
 		FFTZip = dict(zip(fftdata1['Frequencies'],fftdata1['Amplitude']))
 		
 		request.session['FFTZip'] = FFTZip
-		#messages.error(request,"uploaded")
+		## Return the data to fftdata template
 		return render(request, "csvapp/fftdata.html", {"fftdata":fftdata3,"rawdata":rawdata})			
 		# except Exception as e:
 		# 	logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))
@@ -197,12 +199,15 @@ def upload_withouttime(request):
     # if not GET, then proceed
 	#try:	
 	data1={}
+
 	CSVData = csvwithouttime(request.POST,request.FILES)
 		
-		
+	## Access the input file from the payload	
 	csv_file = request.FILES['file']
 		
 	sampfreq1 = request.POST.get("sampfreq")
+
+	## Store the other parameters
 	modelnoval=request.POST.get("modelno")
 
 	rpmval=request.POST.get("rpm")
@@ -224,8 +229,6 @@ def upload_withouttime(request):
 		
 	else:
 		
-		
-		
 		nb = int(nval)
 		inner = float(innerval)
 		outer = float(outerval)
@@ -235,12 +238,15 @@ def upload_withouttime(request):
 	
 	
 	
-	#check if csv file or not
+	# check if csv file or not
 	if not csv_file.name.endswith('.csv'):
 		print("not ending with .csv")
 		messages.error(request,'File is not CSV type')
 			
 		return render(request, "csvapp/upload.html", data1)
+
+
+	## 	Read the csv file using pandas dataframe and check for the columns accordingly
 	csv=pd.read_csv(csv_file,error_bad_lines=False) 
 	col=csv.columns.tolist()
 	col1=csv.columns.tolist()
@@ -261,16 +267,15 @@ def upload_withouttime(request):
 		return render(request, "csvapp/upload.html", data1)
 	if n>0:
 		for word in colnames:
-			if not word in col:
+			if not word in col1:
 				print("no columns")
 				messages.error(request,'Upload correct csv file....[amplitude]')
 				return render(request, "csvapp/envelop.html", data1)
 	
-	if col[0] != 'amplitude':
-		messages.error(request,'File column names mismatch')			
-		return render(request, "csvapp/upload.html", data1)
-
 	
+	
+	## 	Convert csv file json object to string and 
+	## store the rawdata to plot the graph
 	input_file = request.FILES.get(u'file')
 	if input_file:
 		#input_file_df = pd.read_csv(input_file)
@@ -284,18 +289,20 @@ def upload_withouttime(request):
 	rawdata={"amplitude":amplitude.tolist()}
 			
 		
-
+	## API call with payload
 	
 	url = api_url + "test/"
-	payload = {"input_file":df_json,"frequency":sampfreq1,"modelno":modelno,"rpm":rpm,"nb":"null","inner":"null","outer":"null","bd":"null","angle":"null"}
+	payload = {"input_file":df_json,"frequency":sampfreq1,"modelno":modelno,"rpm":rpm,"nb":"null","inner":"null",
+															"outer":"null","bd":"null","angle":"null"}
 	if inner!="":
 		
-		payload = {"input_file":df_json,"frequency":sampfreq1,"modelno":modelno,"rpm":rpm,"nb":nb,"inner":inner,"outer":outer,"bd":bd,"angle":angle}
+		payload = {"input_file":df_json,"frequency":sampfreq1,"modelno":modelno,"rpm":rpm,"nb":nb,
+							"inner":inner,"outer":outer,"bd":bd,"angle":angle}
 	
 	url_response = requests.post(url, data = payload)
 	
 	fftdata1=url_response.json()
-	fftdata2 = json.dumps(fftdata1)
+	
 	fftdata3={"Frequencies":fftdata1['Frequencies'],"Amplitude":fftdata1['Amplitude']}
 	#print(fftdata1['Frequencies'])
 	#print(fftdata1)

@@ -36,6 +36,8 @@ def index(request):
     if request.method == 'POST':
         #serializer = SnippetSerializer(data=request.data)
         #csv_file = request.data.get("file")
+        
+        ## Access the inputfile from payload
         samplingfreq = float(request.data.get("frequency"))
         input_file_json = json.loads(request.data.get('input_file'))
         df_in_second_api = pd.read_json(input_file_json)
@@ -60,18 +62,13 @@ def index(request):
         b=result['Amplitude'].tolist()
         
 
-        FFT_dict={"Frequencies":a,"Amplitude":b,"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null","FBSF":"null","FFTF":"null"}
-        #mongo_client = MongoClient()
+        FFT_dict={"Frequencies":a,"Amplitude":b,"BPFO":"null","BPFI":"null","BSF":"null",
+                "FTF":"null","FBPFO":"null","FBPFI":"null","FBSF":"null","FFTF":"null"}
         
-        #mongo_client = MongoClient('mongodb://127.0.0.1:27017')
-        #print(mongo_client)
-        #FFT_dict={"Frequencies":frequencies,"Amplitude":abs(fourierTransform)}
-        #FFTZip = dict(zip(frequencies,abs(fourierTransform)))
-        #print(FFTZip)
-        #to calculate bearing freuency calculator
         rpmval = request.data.get("rpm")
         inner = request.data.get("inner")
-
+        ## If modelno is not null get the bearing frequencies from 
+        ## database by passing modelno using mongoclient
         if modelno != "null":
             # print("insode modelno")
             mongo_client = MongoClient()
@@ -96,15 +93,16 @@ def index(request):
                 BPFI = BPFIval*rpm/60
                 BSF = BSFval*rpm/60
                 FTF = FTFval*rpm/60
+
+        ## If modelno is null ,calculate faults by peakdetection algorithm
+        ## by taking taking other dimensions 
         if modelno == "":
             if inner == "null":
             
                 inner=""
             else:
             
-                rpm=float(request.data.get("rpm"))
-        
-            
+                rpm=float(request.data.get("rpm"))           
                 nb=int(request.data.get("nb"))
                 inner=float(request.data.get("inner"))
                 outer=float(request.data.get("outer"))
@@ -150,7 +148,8 @@ def index(request):
                 freq_dict[names[i]]=all_freq
             print(freq_dict)
             FFT_dict={"Frequencies":a,"Amplitude":b,"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF,"FBPFO":freq_dict['BPFO'],"FBPFI":freq_dict['BPFI'],"FBSF":freq_dict['BSF'],"FFTF":freq_dict['FTF']}
-         
+        
+        ## JSONResult
         return JsonResponse(FFT_dict)
         #return HttpResponse(json.dumps(FFTZip))
         #return Response(data={responsedata},status=status.HTTP_200_OK)
@@ -165,7 +164,7 @@ def upload_csv(request):
         #serializer = SnippetSerializer(data=request.data)
         #csv_file = request.data.get("file")
         
-       
+        ## Access the input file from the payload
         input_file_json = json.loads(request.data.get('input_file'))
         
         
@@ -176,9 +175,11 @@ def upload_csv(request):
         modelno=request.data.get('modelno')
         noofcol = int(request.data.get('noofcol'))
 
-
+        ## drop the null data from the each raw
         dropnullrowsdf = df_in_second_api.dropna()
        
+       ## if noofcol is 3 calculate the time difference of From and To and store 
+       ## in another column to get total time
         if noofcol == 3:
             timevalues = dropnullrowsdf['From']
        
@@ -207,6 +208,8 @@ def upload_csv(request):
             time=dropnullrowsdf['From']
             amplitude=dropnullrowsdf['Total Acceleration avg']
             num1 = time.sum()
+
+            ## If noofcol is 2 store the amplitude and time values
         if noofcol == 2:
             for i in range(len(col)):
 	            col1[i] = col1[i].lower()
@@ -218,59 +221,49 @@ def upload_csv(request):
             time=dropnullrowsdf[timeindex]
             amplitude=dropnullrowsdf[ampindex]
             num1=time.iloc[-1] - time.iloc[0]
-        # to calculate fft
-        
-        val = len(time)
 
+
+        ## Calculate sampling frequency
+        val = len(time)
         num = num1
-        
-        #num = time. iloc[-1]
-       
-        print("frequency")
-       
         sf = (val/num)*1000
-        
         samplingFrequency = sf
         
         
 
         
-
+        ## Calculate FFT
         result = FFT(amplitude,samplingFrequency)
         
+        ## Store Frequencies and amplitude
         a=result['Frequencies'].tolist()
         b=result['Amplitude'].tolist()
-
-        print(b)
         FFT_dict={"Frequencies":a,"Amplitude":b,"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null"}
 
         rpmval = request.data.get("rpm")
         innerval = request.data.get("inner")
+        ## If modelno is not null get fault frequencies 
+        ## from database
         if modelno != "null":
             # print("insode modelno")
             mongo_client = MongoClient()
-        
             mongo_client = MongoClient(dbname)
             db = mongo_client.test
-            
             data=db.bearingfaults
-            
             modellist=data.find({"ModelNo":modelno})
-            #print("ModelNo:"+item["ModelNo"] +"BPFO:"+str(item["BPFO"]))
-            print(modellist.count())
+            
             for item in modellist:
                 BPFOval = item["BPFO"]
                 BPFIval = item["BPFI"]
                 BSFval = item["BSF"]
                 FTFval = item["FTF"]
-            
-                
+        
                 rpm=float(rpmval)
                 BPFO = BPFOval*rpm/60
                 BPFI = BPFIval*rpm/60
                 BSF = BSFval*rpm/60
                 FTF = FTFval*rpm/60
-
+        ## if modelno is null take other dimentions and calculate bearing frequencies
         if modelno == "":
             if innerval == "null":
             
@@ -298,7 +291,9 @@ def upload_csv(request):
         else:
                 
             FFT_dict={"Frequencies":a,"Amplitude":b,"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
-   
+
+
+        ## return JSONResult
         return JsonResponse(FFT_dict)
         #return HttpResponse(json.dumps(FFTZip))
         #return Response(data={responsedata},status=status.HTTP_200_OK)
@@ -311,7 +306,7 @@ def testapi(request):
         dict={"teststring":textstring}
         return JsonResponse(dict)
 
-
+## FFT Function
 
 def FFT(x ,Sfreq):
     
@@ -330,7 +325,7 @@ def FFT(x ,Sfreq):
     return {'Frequencies': frequencies ,'Amplitude': abs(fourierTransform)}
 
 
-
+## TO calculate bearing frequencies
 
 def BearingFrequenies(rpm,N,Inner,Outer,Bd,angle=0):
    # Convert RPM into Hz 

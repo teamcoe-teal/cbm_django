@@ -28,6 +28,7 @@ warnings.filterwarnings("ignore")
 #from pymongo import MongoClient
 from findpeaks import findpeaks
 from django.conf import settings
+from sklearn.ensemble import IsolationForest
 
 mongo_url="mongodb://127.0.0.1:27017"
 dbname=settings.DATABASE
@@ -42,14 +43,10 @@ def envelop_upload_csv(request):
         #serializer = SnippetSerializer(data=request.data)
         #csv_file = request.data.get("file")
         
-        
-      
-        
+        ##  Access the input file from the payload
         input_file_json = json.loads(request.data.get('input_file'))
         df_in_second_api = pd.read_json(input_file_json)
         
-        
-       
         col=list(df_in_second_api.columns)
         col1=list(df_in_second_api.columns)
        
@@ -59,8 +56,11 @@ def envelop_upload_csv(request):
         numtaps=request.data.get('numtaps')
         modelno=request.data.get('modelno')
         noofcol = int(request.data.get('noofcol'))
-      
+        ## drop the null data from the each raw
         dropnullrowsdf = df_in_second_api.dropna()
+
+        ## if noofcol is 3 calculate the time difference of From and To and store 
+        ## in another column to get total time
         if noofcol == 3:
             timevalues = dropnullrowsdf['From']
         
@@ -75,9 +75,9 @@ def envelop_upload_csv(request):
                 fromt1 = datetime.strptime(fromtime1, "%Y-%m-%d %H:%M:%S")
                 fromt2=datetime.strptime(fromtime2, "%Y-%m-%d %H:%M:%S")
                 
-                ms1 = fromt1.timestamp() * 1000
+                ms1 = fromt1.timestamp() *1
                 
-                ms2=fromt2.timestamp() * 1000
+                ms2=fromt2.timestamp() * 1
                 
                 maindiff = ms2-ms1
                 
@@ -90,7 +90,8 @@ def envelop_upload_csv(request):
             amplitude=dropnullrowsdf['Total Acceleration avg']
            
             num1=time.sum()
-            
+
+        ## If noofcol is 2 store the amplitude and time values   
         if noofcol == 2:
             for i in range(len(col)):
 	            col1[i] = col1[i].lower()
@@ -104,17 +105,21 @@ def envelop_upload_csv(request):
             num1 = time.iloc[-1] - time.iloc[0]
         # to calculate fft
         
+        ## Calculate sampling frequency
         val = len(time)
         
         num = num1
         
-        sf = (val/num)*1000
+        sf = (val/num)*1
         Sfreq = sf
         
-        
+       
         x=amplitude
         y=time
         Freq = abs(y)
+
+        ## If modelno is not null get fault frequencies 
+        ## from database
         if modelno != "null":
             # print("insode modelno")
             mongo_client = MongoClient()
@@ -143,7 +148,8 @@ def envelop_upload_csv(request):
             
 
         #filterresult = FILTER(x,Sfreq,f1,f2,numtaps)
-     
+        
+        ## if algorithm selected is hilbert Transform,calculate the envelope signal and FFT of the envelope
         if algo == "hilbtrans":
             
             # For enveloping using hilbert transform          
@@ -154,40 +160,75 @@ def envelop_upload_csv(request):
             FFT_dc = FFT(Env_dc,Sfreq)
             
 
-            Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null"}
+            Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),
+            "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
+            "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null",
+            "FBSF":"null","FFTF":"null"}
             
             #Envelope_dict={"EnvSignalHilbert":Env_dc,"EnvSignalHilbertFFT":FFT(Env_dc,Sfreq),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null"}
             rpmval = request.data.get("rpm")
             innerval = request.data.get("inner")
-            
+            ## if modelno is null take other dimentions and calculate bearing
+            #  faults using peakdetection algorithm
             if modelno == "":
 
                 if innerval == "null":
                     inner=""
                 else:
-            
                     rpm=float(request.data.get("rpm"))
-        
-                   
                     nb=int(request.data.get("nb"))
                     inner=float(request.data.get("inner"))
                     outer=float(request.data.get("outer"))
                     bd=float(request.data.get("bd"))
                     angle=float(request.data.get("angle"))
                 if(inner!=""):
-                   
-           
                     bearfreq=BearingFrequenies(rpm,nb,inner,outer,bd,angle)
+                    dffreq = pd.DataFrame(FFT_dc['Frequencies'] ,columns=['Frequencies'])
+                    dfamp = pd.DataFrame(FFT_dc['Amplitude'],columns=['Amplitude'])
+                    dffreq.reset_index(drop=True, inplace=True)
+                    dfamp.reset_index(drop=True, inplace=True)
+                    df_freqamp = pd.concat([dffreq, dfamp],axis=1)
+                    print(df_freqamp)
+                    freq_list = list()
+                    freq_list.append(bearfreq['BPFO'])
+                    freq_list.append(bearfreq['BPFI'])
+                    freq_list.append(bearfreq['BSF'])
+                    freq_list.append(bearfreq['FTF'])
+                    freq_dict={}
+                    names=['BPFO','BPFI','BSF','FTF'] 
+                    freq_dict1=FaultDectector(df_freqamp,freq_list)
+                    Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),
+                    "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
+                    "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict1['BPFO'],
+                    "FBPFI":freq_dict1['BPFI'],"FBSF":freq_dict1['BSF'],"FFTF":freq_dict1['FTF']}
                     
-                    Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":bearfreq['BPFO'],"BPFI":bearfreq['BPFI'],"BSF":bearfreq['BSF'],"FTF":bearfreq['FTF']}
+                    #Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":bearfreq['BPFO'],"BPFI":bearfreq['BPFI'],"BSF":bearfreq['BSF'],"FTF":bearfreq['FTF']}
                 
                 #Envelope_dict={"EnvSignalHilbert":Env_dc,"EnvSignalHilbertFFT":FFT(Env_dc,Sfreq),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
                 #Envelope_dict={"EnvSignalHilbertFFT":FFT(Env_dc,Sfreq),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
             else:
+                dffreq = pd.DataFrame(FFT_dc['Frequencies'] ,columns=['Frequencies'])
+                dfamp = pd.DataFrame(FFT_dc['Amplitude'],columns=['Amplitude'])
+                dffreq.reset_index(drop=True, inplace=True)
+                dfamp.reset_index(drop=True, inplace=True)
+                df_freqamp = pd.concat([dffreq, dfamp],axis=1)
+                print(df_freqamp)
+                freq_list = list()
+                freq_list.append(BPFO)
+                freq_list.append(BPFI)
+                freq_list.append(BSF)
+                freq_list.append(FTF)
+                freq_dict={}
+                names=['BPFO','BPFI','BSF','FTF']
                 
-                Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
+                freq_dict1=FaultDectector(df_freqamp,freq_list)
+                print(freq_dict1)
+                Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict1['BPFO'],"FBPFI":freq_dict1['BPFI'],"FBSF":freq_dict1['BSF'],"FFTF":freq_dict1['FTF']}
                 
+                #Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
                 
+        ## if algorithm is demodulation,calculate envelope signal 
+        # using demodulation algorithm and FFT of it      
         else:
             Ba1 = Sfreq/4
             Ba2 = (3/8)*Sfreq
@@ -200,7 +241,10 @@ def envelop_upload_csv(request):
             
             FFT_dc = FFT(Demod_dc,Sfreq)
             Freq = abs(y)
-            Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Demod_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null"}
+            Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Demod_dc).tolist(),
+            "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
+            "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null",
+            "FBSF":"null","FFTF":"null"}
                 
             #Envelope_dict={"EnvSignalDemodulation":Demod_dc,"EnvSignalDemoduationFFT":FFT(Demod_dc,Sfreq),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null"}
       
@@ -223,18 +267,22 @@ def envelop_upload_csv(request):
                     angle=float(request.data.get("angle"))
                 if(inner!=""):
                     bearfreq=BearingFrequenies(rpm,nb,inner,outer,bd,angle)
-                    Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Demod_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":bearfreq['BPFO'],"BPFI":bearfreq['BPFI'],"BSF":bearfreq['BSF'],"FTF":bearfreq['FTF']}
+                    
+                    Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Demod_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":bearfreq['BPFO'],"BPFI":bearfreq['BPFI'],"BSF":bearfreq['BSF'],"FTF":bearfreq['FTF'],"FBPFO":"null","FBPFI":"null","FBSF":"null","FFTF":"null"}
                 
              
                     #Envelope_dict={"EnvSignalDemodulation":Demod_dc,"EnvSignalDemoduationFFT":FFT(Demod_dc,Sfreq),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
             else:
 
-                Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Demod_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
+                Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Demod_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF,"FBPFO":"null","FBPFI":"null","FBSF":"null","FFTF":"null"}
                 
 
         #FFT_dict={"Frequencies":frequencies,"Amplitude":abs(fourierTransform)}
         # FFTZip = dict(zip(frequencies,abs(fourierTransform)))
         # print(FFTZip)
+
+
+        ## Return result as json
         return JsonResponse(Envelope_dict)
         #return HttpResponse(json.dumps(FFTZip))
         #return Response(data={responsedata},status=status.HTTP_200_OK)
@@ -351,7 +399,8 @@ def envelop_upload_withouttime(request):
     if request.method == 'POST':
         #serializer = SnippetSerializer(data=request.data)
         #csv_file = request.data.get("file")
-        
+
+        ## Access the inputfile from payload
         input_file_json = json.loads(request.data.get('input_file'))
         df_in_second_api = pd.read_json(input_file_json)
         col=list(df_in_second_api.columns)
@@ -368,6 +417,9 @@ def envelop_upload_withouttime(request):
         numtaps=request.data.get('numtaps')
         modelno = request.data.get('modelno')
 
+
+        ## If modelno is not null get the freaquencies from 
+        # database based on the modelno
         if modelno != "null":
             # print("insode modelno")
             mongo_client = MongoClient()
@@ -401,37 +453,36 @@ def envelop_upload_withouttime(request):
         x=df_in_second_api[ampindex]
 
         #filterresult = FILTER(x,Sfreq,f1,f2,numtaps)
-        
+        ## if algorithm selected is hilbert Transform,calculate the envelope signal and FFT of the envelope
         if algo == "hilbtrans":
-          
             # For enveloping using hilbert transform          
             Env_x = abs(hilbert(FILTER(x,Sfreq,f1,f2,numtaps)))
             Env_x_rounded = np.round(Env_x,4)
             Env_dc = (Env_x_rounded  - np.mean(Env_x_rounded)).squeeze()
             FFT_dc = FFT(Env_dc,Sfreq)
-           
-            #Envelope_dict={"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null"}
-            Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null","FBSF":"null","FFTF":"null"}
+            Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),
+            "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
+            "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null","FBSF":"null",
+            "FFTF":"null"}
             
+            #Envelope_dict={"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null"}
+           
             #Envelope_dict={"EnvSignalHilbert":Env_dc,"EnvSignalHilbertFFT":FFT(Env_dc,Sfreq),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null"}
             
             inner = request.data.get("inner")
-           
+            ## if modelno is null take other dimentions and calculate bearing
+            #  faults using peakdetection algorithm
             if modelno == "":
                 if inner == "null":
                     inner=""
                 else:
-            
                     rpm=float(request.data.get("rpm"))
-        
-                   
                     nb=int(request.data.get("nb"))
                     inner=float(request.data.get("inner"))
                     outer=float(request.data.get("outer"))
                     bd=float(request.data.get("bd"))
                     angle=float(request.data.get("angle"))
                 if(inner!=""):
-                
                     bearfreq=BearingFrequenies(rpm,nb,inner,outer,bd,angle)
                     dffreq = pd.DataFrame(FFT_dc['Frequencies'] ,columns=['Frequencies'])
                     dfamp = pd.DataFrame(FFT_dc['Amplitude'],columns=['Amplitude'])
@@ -445,12 +496,14 @@ def envelop_upload_withouttime(request):
                     freq_list.append(bearfreq['FTF'])
                     freq_dict={}
                     names=['BPFO','BPFI','BSF','FTF']
-                    
+                    freq_dict1=FaultDectector(df_freqamp,freq_list)
+                   
                     for i in range(len(freq_list)):
+
                         all_freq=PEAKDETECTOR(df_freqamp,freq_list[i],4)
                         freq_dict[names[i]]=all_freq
                     
-                    Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict['BPFO'],"FBPFI":freq_dict['BPFI'],"FBSF":freq_dict['BSF'],"FFTF":freq_dict['FTF']}
+                    Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict1['BPFO'],"FBPFI":freq_dict1['BPFI'],"FBSF":freq_dict1['BSF'],"FFTF":freq_dict1['FTF']}
                     #Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":bearfreq['BPFO'],"BPFI":bearfreq['BPFI'],"BSF":bearfreq['BSF'],"FTF":bearfreq['FTF'],"FBPFO":freq_dict['BPFO'],"FBPFI":freq_dict['BPFI'],"FBSF":freq_dict['BSF'],"FFTF":freq_dict['FTF']}
                 
                     #Envelope_dict={"EnvSignalHilbert":Env_dc,"EnvSignalHilbertFFT":FFT(Env_dc,Sfreq),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
@@ -469,19 +522,19 @@ def envelop_upload_withouttime(request):
                 freq_list.append(FTF)
                 freq_dict={}
                 names=['BPFO','BPFI','BSF','FTF']
-                fault_freq=[105,159,139,29]
-                for i in range(len(freq_list)):
-                    all_freq=PEAKDETECTOR(df_freqamp,freq_list[i],4)
-                    freq_dict[names[i]]=all_freq
+                freq_dict1=FaultDectector(df_freqamp,freq_list)
+                Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),
+                "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
+                "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict1['BPFO'],
+                "FBPFI":freq_dict1['BPFI'],"FBSF":freq_dict1['BSF'],"FFTF":freq_dict1['FTF']}
                 
-                #peaks = PEAKDETECTOR(df_freqamp,freq_list,4)
-                # #print(peaks)
-               
-                Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict['BPFO'],"FBPFI":freq_dict['BPFI'],"FBSF":freq_dict['BSF'],"FFTF":freq_dict['FTF']}
+                #Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict['BPFO'],"FBPFI":freq_dict['BPFI'],"FBSF":freq_dict['BSF'],"FFTF":freq_dict['FTF']}
                 #Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF,"FBPFO":freq_dict['BPFO'],"FBPFI":freq_dict['BPFI'],"FBSF":freq_dict['BSF'],"FFTF":freq_dict['FTF']}
             
                 #Envelope_dict={"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
-                
+
+        ## if algorithm is demodulation,calculate envelope signal 
+        # using demodulation algorithm and FFT of it       
         else:
             Ba1 = Sfreq/4
             Ba2 = (3/8)*Sfreq
@@ -494,7 +547,10 @@ def envelop_upload_withouttime(request):
             
             FFT_dc = FFT(Demod_dc,Sfreq)
             
-            Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Demod_dc.tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null"}
+            Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Demod_dc.tolist(),
+            "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
+            "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null",
+            "FBSF":"null","FFTF":"null"}
                 
             #Envelope_dict={"EnvSignalDemodulation":Demod_dc,"EnvSignalDemoduationFFT":FFT(Demod_dc,Sfreq),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null"}
             
@@ -516,15 +572,16 @@ def envelop_upload_withouttime(request):
                 if(innerval!=""):
                     bearfreq=BearingFrequenies(rpm,nb,inner,outer,bd,angle)
 
-                    Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":abs(Demod_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":bearfreq['BPFO'],"BPFI":bearfreq['BPFI'],"BSF":bearfreq['BSF'],"FTF":bearfreq['FTF']}
+                    Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":abs(Demod_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":bearfreq['BPFO'],"BPFI":bearfreq['BPFI'],"BSF":bearfreq['BSF'],"FTF":bearfreq['FTF'],"FBPFO":"null","FBPFI":"null","FBSF":"null","FFTF":"null"}
                 
                     #Envelope_dict={"EnvSignalDemodulation":Demod_dc,"EnvSignalDemoduationFFT":FFT(Demod_dc,Sfreq),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
             else:
-                Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":abs(Demod_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
+                Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":abs(Demod_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF,"FBPFO":"null","FBPFI":"null","FBSF":"null","FFTF":"null"}
                   
         #FFT_dict={"Frequencies":frequencies,"Amplitude":abs(fourierTransform)}
         # FFTZip = dict(zip(frequencies,abs(fourierTransform)))
         # print(FFTZip)
+        ## Return as jsonresult
         return JsonResponse(Envelope_dict)
         #return HttpResponse(json.dumps(FFTZip))
         #return Response(data={responsedata},status=status.HTTP_200_OK)
@@ -648,6 +705,70 @@ def BearingFrequenies(rpm,N,Inner,Outer,Bd,angle=0):
    
    return {'BPFO': BPFO ,'BPFI': BPFI ,'BSF': BSF ,'FTF': FTF}
 
+def FaultDectector(array, fault_freq):
+    def findpeaklibrary(array, freq, N=4):
+
+        freq_list = [i * freq for i in range(1, N + 1)]
+
+        detected_freq = list()
+        detected_amp = list()
+        
+
+        for expected_freq in freq_list:
+            
+            x = array.query('Frequencies>@expected_freq-5 & Frequencies<@expected_freq+5')
+            
+            fp = findpeaks(method='topology', lookahead=1, verbose=0)
+            results = fp.fit(x['Amplitude'])
+            peak_amp = list(results['df'].query('peak==True')['y'])
+            peak_amp = max(peak_amp)
+            peak_freq = list(array.query('Amplitude=={}'.format(peak_amp))['Frequencies'])[0]
+            detected_freq.append(peak_freq)
+            detected_amp.append(peak_amp)
+        return {'Frequencies': detected_freq, 'Amplitude': detected_amp}
+
+    df = array.copy()
+
+    model = IsolationForest(n_estimators=100, max_samples='auto', contamination=float(0.01), max_features=1.0)
+    model.fit(df[['Amplitude']])
+    df['anomaly'] = model.predict(df[['Amplitude']])
+    Anomaly_df = df[df['anomaly'] == -1]
+    Anomaly_rms = np.sqrt(np.mean([i ** 2 for i in Anomaly_df['Amplitude']]))
+    Anomaly_param = 2.5 * Anomaly_rms
+
+    detected_peaks = list()
+    for i in fault_freq:
+        x = findpeaklibrary(df, i, 4)
+        detected_peaks.append(x)
+
+    detected_freq_dict = {'BPFO': detected_peaks[0], 'BPFI': detected_peaks[1], 'BSF': detected_peaks[2],
+                          'FTF': detected_peaks[3]}
+
+    true_cond = list()
+    for i in detected_freq_dict.items():
+
+        key = i[0]
+        amps = i[1]['Amplitude']
+        freq = i[1]['Frequencies']
+        count = sum(n > Anomaly_param for n in amps)
+
+        if count >= 3:
+            cond = True
+        else:
+            cond = False
+
+        if cond:
+            true_cond.append(key)
+
+    if not true_cond:
+        return []
+
+    else:
+        fault_dict={'BPFO':[],'BPFI':[],'BSF':[],'FTF':[]}
+        for fault in true_cond:
+            fault_dict[fault] = detected_freq_dict[fault]['Frequencies']
+
+        return fault_dict
 
 
 def PEAKDETECTOR(array, freq, N):
