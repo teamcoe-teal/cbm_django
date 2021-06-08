@@ -13,9 +13,9 @@ import json
 import csv
 from csvapp.forms import csvwithouttime
 
-api_url = "http://127.0.0.1:8000/csvrestapi/"
+# api_url = "http://127.0.0.1:8000/csvrestapi/"
 
-# api_url ="https://cbmapiteal.azurewebsites.net/csvrestapi/"
+api_url ="https://cbmapiteal.azurewebsites.net/csvrestapi/"
 
 def envelop_index(request):
 	if request.method == "POST":	
