@@ -24,16 +24,22 @@
 <br/>
 <div id="showvalues" style="display:none">
 <div>
-    <input type="checkbox" class="Checked" id="cbbpfi" name="cbbpfi" value="cbbpfi" onchange="switchbpfi(this)">
-    <label for="cbbpfi" style="color:black">BPFI</label>
-    <input type="checkbox" class="Checked" id="cbbpfo" name="cbbpfo" value="cbbpfo" onchange="switchbpfi(this)">
-    <label for="cbbpfi"style="color:black">BPFO</label>
-   <input type="checkbox" class="Checked" id="cbbsf" name="cbbsf" value="cbbsf" onchange="switchbpfi(this)">
-    <label for="cbbpfi" style="color:black">BSF</label>
-  <input type="checkbox" class="Checked" id="cbftf" name="cbftf" value="cbftf" onchange="switchbpfi(this)">
-    <label for="cbbpfi" style="color:black">FTF</label>
+<label for="typeoffault"  style="color:black">Fault Status</label>
+{% comment %} <span id="typeoffault"></span> {% endcomment %}
+<input type="text" class="" id="typeoffault" name="typeoffault" value="" readonly style="color:black">
+    
 </div>
-<label style="color:black">BPFO :  <span id="bpfo"></span></label> <label style="color:black"> BPFI : <span id="bpfi"></span></label> <label style="color:black">BSF : <span id="bsf"></span></label> <label style="color:black">FTF : <span id="ftf"></span></label>
+<div>
+    <input type="checkbox" class="Checked" id="cbbpfi" name="cbbpfi" value="cbbpfi" onchange="switchbpfi(this)">
+    <label for="cbbpfi" id="lbpfi" style="color:black">BPFI</label>
+    <input type="checkbox" class="Checked" id="cbbpfo" name="cbbpfo" value="cbbpfo" onchange="switchbpfi(this)">
+    <label for="cbbpfo" id="lbpfo" style="color:black">BPFO</label>
+   <input type="checkbox" class="Checked" id="cbbsf" name="cbbsf" value="cbbsf" onchange="switchbpfi(this)">
+    <label for="cbbsf" id="lbsf" style="color:black">BSF</label>
+  <input type="checkbox" class="Checked" id="cbftf" name="cbftf" value="cbftf" onchange="switchbpfi(this)">
+    <label for="cbftf"  id="lftf" style="color:black">FTF</label>
+</div>
+<label id="lbpfo1" style="color:black">BPFO :  <span id="bpfo"></span></label> <label id="lbpfi1" style="color:black"> BPFI : <span id="bpfi"></span></label> <label id="lbsf1" style="color:black">BSF : <span id="bsf"></span></label> <label id="lftf1" style="color:black">FTF : <span id="ftf"></span></label>
 </div>
 
 
@@ -93,31 +99,47 @@ var mydata={{ envelopdata | safe}}
   if(fbpfo[0]!=''){
     
   document.getElementById('bpfo').innerText=fbpfo[0]
+  document.getElementById('typeoffault').value="Outer Fault Detected"
   }
   else{
-    document.getElementById("bpfo").innerHTML="No outer fault";
+    var x = document.getElementById("bpfo");
+    var y = document.getElementById("lbpfo1");
+    x.style.display = "none";
+    y.style.display="none";
   }
   if(fbpfi != ''){
     
   document.getElementById('bpfi').innerText=fbpfi[0]
+  document.getElementById('typeoffault').value="Inner Fault Detected"
   }
   else{
     
-    document.getElementById("bpfi").innerHTML="No inner fault";
+    var x = document.getElementById("bpfi");
+    var y = document.getElementById("lbpfi1");
+    x.style.display = "none";
+    y.style.display="none";
 
   }
   if(fbsf!=''){
   document.getElementById('bsf').innerText=fbsf[0]
+  document.getElementById('typeoffault').value="Ball Fault Detected"
   }
   else{
-
-    document.getElementById("bsf").innerHTML="No ball fault";
+    var x = document.getElementById("bsf");
+    var y = document.getElementById("lbsf1");
+    x.style.display = "none";
+    y.style.display="none";
+    
   }
   if(fftf!=''){
   document.getElementById('ftf').innerText=fftf[0]
+  document.getElementById('typeoffault').value="Cage Fault Detected"
   }
   else{
-    document.getElementById("ftf").innerHTML="No cage fault";
+    var x = document.getElementById("ftf");
+    var y = document.getElementById("lftf1");
+    x.style.display = "none";
+    y.style.display="none";
   }
   
   
