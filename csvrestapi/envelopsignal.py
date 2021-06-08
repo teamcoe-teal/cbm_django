@@ -197,7 +197,13 @@ def envelop_upload_csv(request):
                     freq_dict={}
                     names=['BPFO','BPFI','BSF','FTF'] 
                     freq_dict1=FaultDectector(df_freqamp,freq_list)
-                    Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),
+                    if freq_dict1['mes'] == "empty":
+                        Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),
+                            "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
+                                "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null",
+                            "FBSF":"null","FFTF":"null"}
+                    else:
+                        Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),
                     "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
                     "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict1['BPFO'],
                     "FBPFI":freq_dict1['BPFI'],"FBSF":freq_dict1['BSF'],"FFTF":freq_dict1['FTF']}
@@ -222,8 +228,14 @@ def envelop_upload_csv(request):
                 names=['BPFO','BPFI','BSF','FTF']
                 
                 freq_dict1=FaultDectector(df_freqamp,freq_list)
-                print(freq_dict1)
-                Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict1['BPFO'],"FBPFI":freq_dict1['BPFI'],"FBSF":freq_dict1['BSF'],"FFTF":freq_dict1['FTF']}
+                
+                if freq_dict1['mes'] == "empty":
+                    Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),
+                            "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
+                                "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null",
+                            "FBSF":"null","FFTF":"null"}
+                else:
+                    Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict1['BPFO'],"FBPFI":freq_dict1['BPFI'],"FBSF":freq_dict1['BSF'],"FFTF":freq_dict1['FTF']}
                 
                 #Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
                 
@@ -502,8 +514,14 @@ def envelop_upload_withouttime(request):
 
                         all_freq=PEAKDETECTOR(df_freqamp,freq_list[i],4)
                         freq_dict[names[i]]=all_freq
-                    
-                    Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict1['BPFO'],"FBPFI":freq_dict1['BPFI'],"FBSF":freq_dict1['BSF'],"FFTF":freq_dict1['FTF']}
+
+                    if freq_dict1['mes'] == "empty":
+                        Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),
+                                "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
+                                "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null","FBSF":"null",
+                                "FFTF":"null"}
+                    else:
+                        Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict1['BPFO'],"FBPFI":freq_dict1['BPFI'],"FBSF":freq_dict1['BSF'],"FFTF":freq_dict1['FTF']}
                     #Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":bearfreq['BPFO'],"BPFI":bearfreq['BPFI'],"BSF":bearfreq['BSF'],"FTF":bearfreq['FTF'],"FBPFO":freq_dict['BPFO'],"FBPFI":freq_dict['BPFI'],"FBSF":freq_dict['BSF'],"FFTF":freq_dict['FTF']}
                 
                     #Envelope_dict={"EnvSignalHilbert":Env_dc,"EnvSignalHilbertFFT":FFT(Env_dc,Sfreq),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
@@ -523,10 +541,16 @@ def envelop_upload_withouttime(request):
                 freq_dict={}
                 names=['BPFO','BPFI','BSF','FTF']
                 freq_dict1=FaultDectector(df_freqamp,freq_list)
-                Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),
-                "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
-                "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict1['BPFO'],
-                "FBPFI":freq_dict1['BPFI'],"FBSF":freq_dict1['BSF'],"FFTF":freq_dict1['FTF']}
+                if freq_dict1['mes'] == "empty":
+                        Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),
+                                "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
+                                "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null","FBSF":"null",
+                                "FFTF":"null"}
+                else:
+                    Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),
+                        "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
+                        "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict1['BPFO'],
+                        "FBPFI":freq_dict1['BPFI'],"FBSF":freq_dict1['BSF'],"FFTF":freq_dict1['FTF']}
                 
                 #Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict['BPFO'],"FBPFI":freq_dict['BPFI'],"FBSF":freq_dict['BSF'],"FFTF":freq_dict['FTF']}
                 #Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF,"FBPFO":freq_dict['BPFO'],"FBPFI":freq_dict['BPFI'],"FBSF":freq_dict['BSF'],"FFTF":freq_dict['FTF']}
@@ -718,6 +742,11 @@ def FaultDectector(array, fault_freq):
             
             x = array.query('Frequencies>@expected_freq-5 & Frequencies<@expected_freq+5')
             
+            if x.empty:
+               
+                mes="empty"
+                return {"mes":mes}
+
             fp = findpeaks(method='topology', lookahead=1, verbose=0)
             results = fp.fit(x['Amplitude'])
             peak_amp = list(results['df'].query('peak==True')['y'])
@@ -725,7 +754,7 @@ def FaultDectector(array, fault_freq):
             peak_freq = list(array.query('Amplitude=={}'.format(peak_amp))['Frequencies'])[0]
             detected_freq.append(peak_freq)
             detected_amp.append(peak_amp)
-        return {'Frequencies': detected_freq, 'Amplitude': detected_amp}
+        return {'Frequencies': detected_freq, 'Amplitude': detected_amp,"mes":"not empty"}
 
     df = array.copy()
 
@@ -739,6 +768,9 @@ def FaultDectector(array, fault_freq):
     detected_peaks = list()
     for i in fault_freq:
         x = findpeaklibrary(df, i, 4)
+        if x['mes'] == "empty":
+           
+            return {"mes":"empty"}
         detected_peaks.append(x)
 
     detected_freq_dict = {'BPFO': detected_peaks[0], 'BPFI': detected_peaks[1], 'BSF': detected_peaks[2],
@@ -767,7 +799,7 @@ def FaultDectector(array, fault_freq):
         fault_dict={'BPFO':[],'BPFI':[],'BSF':[],'FTF':[]}
         for fault in true_cond:
             fault_dict[fault] = detected_freq_dict[fault]['Frequencies']
-
+            fault_dict['mes'] ="not empty"
         return fault_dict
 
 
