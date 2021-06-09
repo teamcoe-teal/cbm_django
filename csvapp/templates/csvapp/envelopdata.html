@@ -28,7 +28,15 @@
     
   </form>
 </div>
+</br>
+<div id="faultstatus" style="display:none">
+<label for="typeoffault"  style="color:black">Fault Status</label>
+{% comment %} <span id="typeoffault"></span> {% endcomment %}
+<input type="text" class="" id="typeoffault" name="typeoffault" value="" readonly style="color:black">
+    
+</div>
 <div id="showvalues" style="display:none">
+  
   <div>
     <input type="checkbox" id="cbbpfi" name="cbbpfi" value="cbbpfi" onchange="switchbpfi(this)">
     <label for="cbbpfi" style="color:black">BPFI</label>
@@ -100,6 +108,23 @@ var mydata={{ envelopdata | safe}}
   var bpfi={{request.session.BPFI}}
   var bsf={{request.session.BSF}}
   var ftf={{request.session.FTF}}
+  var fm = {{request.session.faultsmsg}}
+
+ if(fm == 0){
+   var x = document.getElementById("faultstatus");
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  }
+  document.getElementById('typeoffault').value="No Fault Detected"
+ }
+ if(fm == 1){
+   var x = document.getElementById("faultstatus");
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  }
+  document.getElementById('typeoffault').value="cannot compute faults for the bearing model selected"
+ }
+
   if(bpfo!=null){
   var bpfon = bpfo.toFixed(2);
   var bpfin = bpfi.toFixed(2);
@@ -110,6 +135,7 @@ var mydata={{ envelopdata | safe}}
   document.getElementById('bpfi').innerText=bpfin
   document.getElementById('bsf').innerText=bsfn
   document.getElementById('ftf').innerText=ftfn
+  
 
   //var document.getElementById('bpfo').val=bpfo;
   var Frequencies={};
