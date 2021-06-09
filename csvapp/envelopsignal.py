@@ -170,7 +170,14 @@ def envelop_upload_csv(request):
 		request.session['fbpfi'] = envelopdata1['FBPFI']
 		request.session['fbsf'] = envelopdata1['FBSF']
 		request.session['fftf'] = envelopdata1['FFTF']
-		
+		request.session['faultsmsg']= envelopdata1['faults_msg']
+		if envelopdata1['faults_msg'] == "nofaults":
+			request.session['faultsmsg'] = 0
+	
+		if envelopdata1['faults_msg'] == "faults cannot be detected":
+			request.session['faultsmsg'] = 1
+		if envelopdata1['faults_msg'] == "faults":
+			request.session['faultsmsg'] = 2
 		## Return the data to envelopdata template
 		if envelopdata1['FBPFO'] != "null":
 			return render(request, "csvapp/enveloppeakdetection.html", {"envelopdata":envelopdata3,"enveloping":envelopingdata,'rawdata':rawdata})			
@@ -395,7 +402,14 @@ def envelop_upload_withouttime(request):
 	request.session['BPFI']= envelopdata1['BPFI']
 	request.session['BSF']= envelopdata1['BSF']
 	request.session['FTF']= envelopdata1['FTF']
+	request.session['faultsmsg']= envelopdata1['faults_msg']
+	if envelopdata1['faults_msg'] == "nofaults":
+		request.session['faultsmsg'] = 0
 	
+	if envelopdata1['faults_msg'] == "faults cannot be detected":
+		request.session['faultsmsg'] = 1
+	if envelopdata1['faults_msg'] == "faults":
+		request.session['faultsmsg'] = 2
 	## Return data to envelopdata.html/enveloppeakdetection.html
 	if envelopdata1['FBPFO'] != "null":
 		return render(request, "csvapp/enveloppeakdetection.html", {"envelopdata":envelopdata3,"enveloping":envelopingdata,"rawdata":rawdata})
