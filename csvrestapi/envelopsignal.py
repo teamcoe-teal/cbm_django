@@ -188,7 +188,7 @@ def envelop_upload_csv(request):
                     dffreq.reset_index(drop=True, inplace=True)
                     dfamp.reset_index(drop=True, inplace=True)
                     df_freqamp = pd.concat([dffreq, dfamp],axis=1)
-                    print(df_freqamp)
+                   
                     freq_list = list()
                     freq_list.append(bearfreq['BPFO'])
                     freq_list.append(bearfreq['BPFI'])
@@ -197,26 +197,24 @@ def envelop_upload_csv(request):
                     freq_dict={}
                     names=['BPFO','BPFI','BSF','FTF'] 
                     freq_dict1=FaultDectector(df_freqamp,freq_list)
-
-                    if freq_dict1 == []:
-                        Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),
-                                "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
-                                "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null","FBSF":"null",
-                                "FFTF":"null","faults_msg":"nofaults"}
-                    else:
-                        if freq_dict1['mes'] == "empty":
+                   
+                    if freq_dict1[0]['mes'] == "empty":
                             Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),
                                 "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
                                 "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null",
                                 "FBSF":"null","FFTF":"null","faults_msg":"faults cannot be detected"}
+                    else:
+                        if freq_dict1[1] == {}:
+                            Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),
+                                "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
+                                "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null","FBSF":"null",
+                                "FFTF":"null","faults_msg":"nofaults"}
                         else:
                             Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),
                                 "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
-                                "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict1['BPFO'],
-                                "FBPFI":freq_dict1['BPFI'],"FBSF":freq_dict1['BSF'],"FFTF":freq_dict1['FTF'],"faults_msg":"faults"}
+                                "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict1[0]['BPFO'],
+                                "FBPFI":freq_dict1[0]['BPFI'],"FBSF":freq_dict[0]['BSF'],"FFTF":freq_dict1[0]['FTF'],"faults_msg":"faults","fault_status":freq_dict1[1]}
                     
-                    #Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":bearfreq['BPFO'],"BPFI":bearfreq['BPFI'],"BSF":bearfreq['BSF'],"FTF":bearfreq['FTF']}
-                
                 #Envelope_dict={"EnvSignalHilbert":Env_dc,"EnvSignalHilbertFFT":FFT(Env_dc,Sfreq),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
                 #Envelope_dict={"EnvSignalHilbertFFT":FFT(Env_dc,Sfreq),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
             else:
@@ -235,22 +233,25 @@ def envelop_upload_csv(request):
                 names=['BPFO','BPFI','BSF','FTF']
                 
                 freq_dict1=FaultDectector(df_freqamp,freq_list)
-                if freq_dict1 == []:
-                        Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),
-                                "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
-                                "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null","FBSF":"null",
-                                "FFTF":"null","faults_msg":"nofaults"}
-                else:
-
-                    if freq_dict1['mes'] == "empty":
+               
+            
+                if freq_dict1[0]['mes'] == "empty":
                         Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),
                             "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
                                 "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null",
                             "FBSF":"null","FFTF":"null","faults_msg":"faults cannot be detected"}
+                else:
+                    if freq_dict1[1] == {}:
+                        Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),
+                                "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
+                                "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null","FBSF":"null",
+                                "FFTF":"null","faults_msg":"nofaults"}
                     else:
                         Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),
-                                        "Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict1['BPFO'],
-                                        "FBPFI":freq_dict1['BPFI'],"FBSF":freq_dict1['BSF'],"FFTF":freq_dict1['FTF'],"faults_msg":"faults"}
+                                        "Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict1[0]['BPFO'],
+                                        "FBPFI":freq_dict1[0]['BPFI'],"FBSF":freq_dict1[0]['BSF'],"FFTF":freq_dict1[0]['FTF'],"faults_msg":"faults","fault_status":freq_dict1[1]}
+                
+
                 
                 #Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Env_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
                 
@@ -295,13 +296,13 @@ def envelop_upload_csv(request):
                 if(inner!=""):
                     bearfreq=BearingFrequenies(rpm,nb,inner,outer,bd,angle)
                     
-                    Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Demod_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":bearfreq['BPFO'],"BPFI":bearfreq['BPFI'],"BSF":bearfreq['BSF'],"FTF":bearfreq['FTF'],"FBPFO":"null","FBPFI":"null","FBSF":"null","FFTF":"null","faults_msg":"faults"}
+                    Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Demod_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":bearfreq['BPFO'],"BPFI":bearfreq['BPFI'],"BSF":bearfreq['BSF'],"FTF":bearfreq['FTF'],"FBPFO":"null","FBPFI":"null","FBSF":"null","FFTF":"null","faults_msg":"faults","fault_status":"null"}
                 
              
                     #Envelope_dict={"EnvSignalDemodulation":Demod_dc,"EnvSignalDemoduationFFT":FFT(Demod_dc,Sfreq),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
             else:
 
-                Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Demod_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF,"FBPFO":"null","FBPFI":"null","FBSF":"null","FFTF":"null","faults_msg":"faults"}
+                Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Demod_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF,"FBPFO":"null","FBPFI":"null","FBSF":"null","FFTF":"null","faults_msg":"faults","fault_statues":"null"}
                 
 
         #FFT_dict={"Frequencies":frequencies,"Amplitude":abs(fourierTransform)}
@@ -405,7 +406,7 @@ def envelop_upload_csv_nobfc(request):
             
             FFT_dc = FFT(Demod_dc,Sfreq)
             Freq = abs(y)
-            Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Demod_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null"}
+            Envelope_dict={"EnvHilbertFreq":Freq.tolist(),"EnvHilbertAmp":abs(Demod_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","fault_statues":"null"}
             #print(Envelope_dict)"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null"}
                 
             #Envelope_dict={"EnvSignalDemodulation":Demod_dc,"EnvSignalDemoduationFFT":FFT(Demod_dc,Sfreq),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null"}
@@ -524,27 +525,29 @@ def envelop_upload_withouttime(request):
                     freq_dict={}
                     names=['BPFO','BPFI','BSF','FTF']
                     freq_dict1=FaultDectector(df_freqamp,freq_list)
-                   
+                    
                     for i in range(len(freq_list)):
 
                         all_freq=PEAKDETECTOR(df_freqamp,freq_list[i],4)
                         freq_dict[names[i]]=all_freq
 
-                    if freq_dict1 == []:
-                        Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),
-                                "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
-                                "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null","FBSF":"null",
-                                "FFTF":"null","faults_msg":"nofaults"}
-                    else:
-                        if freq_dict1['mes'] == "empty":
+                    if freq_dict1[0]['mes'] == "empty":
                             Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),
                                 "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
                                 "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null","FBSF":"null",
                                 "FFTF":"null","faults_msg":"faults cannot be detected"}
                    
+                    else:
+                        if freq_dict1[1] == {}:
+                            Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),
+                                "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
+                                "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null","FBSF":"null",
+                                "FFTF":"null","faults_msg":"nofaults"}
                         else:
-                            Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict1['BPFO'],"FBPFI":freq_dict1['BPFI'],"FBSF":freq_dict1['BSF'],"FFTF":freq_dict1['FTF'],"faults_msg":"faults"}
-                    #Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":bearfreq['BPFO'],"BPFI":bearfreq['BPFI'],"BSF":bearfreq['BSF'],"FTF":bearfreq['FTF'],"FBPFO":freq_dict['BPFO'],"FBPFI":freq_dict['BPFI'],"FBSF":freq_dict['BSF'],"FFTF":freq_dict['FTF']}
+                            Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict1[0]['BPFO'],"FBPFI":freq_dict1[0]['BPFI'],"FBSF":freq_dict1[0]['BSF'],"FFTF":freq_dict1[0]['FTF'],"faults_msg":"faults","fault_status":freq_dict1[1]}
+             
+
+                    # #Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":bearfreq['BPFO'],"BPFI":bearfreq['BPFI'],"BSF":bearfreq['BSF'],"FTF":bearfreq['FTF'],"FBPFO":freq_dict['BPFO'],"FBPFI":freq_dict['BPFI'],"FBSF":freq_dict['BSF'],"FFTF":freq_dict['FTF']}
                 
                     #Envelope_dict={"EnvSignalHilbert":Env_dc,"EnvSignalHilbertFFT":FFT(Env_dc,Sfreq),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
                     #Envelope_dict={"EnvSignalHilbertFFT":FFT(Env_dc,Sfreq),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
@@ -564,24 +567,26 @@ def envelop_upload_withouttime(request):
                 names=['BPFO','BPFI','BSF','FTF']
                 freq_dict1=FaultDectector(df_freqamp,freq_list)
                 
-                
-                if freq_dict1 == []:
-                    Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),
-                                "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
-                                "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null","FBSF":"null",
-                                "FFTF":"null","faults_msg":"nofaults"}
-                else:
+               
 
-                    if freq_dict1['mes'] == "empty":
+                
+                if freq_dict1[0]['mes'] == "empty":
                         Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),
                                 "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
                                 "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null","FBSF":"null",
                                 "FFTF":"null","faults_msg":"faults cannot be detected"}
+                else:
+                    if freq_dict1[1] == {}:
+                        Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),
+                                "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
+                                "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":"null","FBPFI":"null","FBSF":"null",
+                                "FFTF":"null","faults_msg":"nofaults"}
                     else:
                         Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),
                             "Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),
-                            "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict1['BPFO'],
-                            "FBPFI":freq_dict1['BPFI'],"FBSF":freq_dict1['BSF'],"FFTF":freq_dict1['FTF'],"faults_msg":"faults"}
+                            "BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict1[0]['BPFO'],
+                            "FBPFI":freq_dict1[0]['BPFI'],"FBSF":freq_dict1[0]['BSF'],"FFTF":freq_dict1[0]['FTF'],"faults_msg":"faults","fault_status":freq_dict1[1]}
+                
                 
                 #Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":"null","BPFI":"null","BSF":"null","FTF":"null","FBPFO":freq_dict['BPFO'],"FBPFI":freq_dict['BPFI'],"FBSF":freq_dict['BSF'],"FFTF":freq_dict['FTF']}
                 #Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":Env_dc.tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF,"FBPFO":freq_dict['BPFO'],"FBPFI":freq_dict['BPFI'],"FBSF":freq_dict['BSF'],"FFTF":freq_dict['FTF']}
@@ -627,11 +632,11 @@ def envelop_upload_withouttime(request):
                 if(innerval!=""):
                     bearfreq=BearingFrequenies(rpm,nb,inner,outer,bd,angle)
 
-                    Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":abs(Demod_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":bearfreq['BPFO'],"BPFI":bearfreq['BPFI'],"BSF":bearfreq['BSF'],"FTF":bearfreq['FTF'],"FBPFO":"null","FBPFI":"null","FBSF":"null","FFTF":"null","faults_msg":"faults"}
+                    Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":abs(Demod_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":bearfreq['BPFO'],"BPFI":bearfreq['BPFI'],"BSF":bearfreq['BSF'],"FTF":bearfreq['FTF'],"FBPFO":"null","FBPFI":"null","FBSF":"null","FFTF":"null","faults_msg":"faults","fault_statues":"null"}
                 
                     #Envelope_dict={"EnvSignalDemodulation":Demod_dc,"EnvSignalDemoduationFFT":FFT(Demod_dc,Sfreq),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF}
             else:
-                Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":abs(Demod_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF,"FBPFO":"null","FBPFI":"null","FBSF":"null","FFTF":"null","faults_msg":"faults"}
+                Envelope_dict={"EnvHilbertFreq":"null","EnvHilbertAmp":abs(Demod_dc).tolist(),"Frequency":FFT_dc['Frequencies'].tolist(),"Amplitude":FFT_dc['Amplitude'].tolist(),"BPFO":BPFO,"BPFI":BPFI,"BSF":BSF,"FTF":FTF,"FBPFO":"null","FBPFI":"null","FBSF":"null","FFTF":"null","faults_msg":"faults","fault_statues":"null"}
                   
         #FFT_dict={"Frequencies":frequencies,"Amplitude":abs(fourierTransform)}
         # FFTZip = dict(zip(frequencies,abs(fourierTransform)))
@@ -797,22 +802,29 @@ def FaultDectector(array, fault_freq):
     Anomaly_param = 2.5 * Anomaly_rms
 
     detected_peaks = list()
+    dict_msg = dict()
+    all_freq=dict()
+    fault_dict={}
     for i in fault_freq:
         x = findpeaklibrary(df, i, 4)
         if x['mes'] == "empty":
-           
-            return {"mes":"empty"}
+            all_freq['mes'] = "empty"
+            
+            return all_freq,fault_dict
         detected_peaks.append(x)
 
     detected_freq_dict = {'BPFO': detected_peaks[0], 'BPFI': detected_peaks[1], 'BSF': detected_peaks[2],
                           'FTF': detected_peaks[3]}
 
     true_cond = list()
+    
+
     for i in detected_freq_dict.items():
 
         key = i[0]
         amps = i[1]['Amplitude']
         freq = i[1]['Frequencies']
+        all_freq[key]=freq
         count = sum(n > Anomaly_param for n in amps)
 
         if count >= 3:
@@ -822,16 +834,21 @@ def FaultDectector(array, fault_freq):
 
         if cond:
             true_cond.append(key)
-
+    
     if not true_cond:
-        return []
+        all_freq['mes'] =""
+        return all_freq,fault_dict
 
     else:
-        fault_dict={'BPFO':[],'BPFI':[],'BSF':[],'FTF':[]}
+        #fault_dict={'BPFO':[],'BPFI':[],'BSF':[],'FTF':[]}
+        
         for fault in true_cond:
             fault_dict[fault] = detected_freq_dict[fault]['Frequencies']
-            fault_dict['mes'] ="not empty"
-        return fault_dict
+            all_freq['mes'] ="not empty"
+        
+        
+        return (all_freq,fault_dict)
+        
 
 
 def PEAKDETECTOR(array, freq, N):

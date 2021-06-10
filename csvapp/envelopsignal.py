@@ -170,6 +170,7 @@ def envelop_upload_csv(request):
 		request.session['fbpfi'] = envelopdata1['FBPFI']
 		request.session['fbsf'] = envelopdata1['FBSF']
 		request.session['fftf'] = envelopdata1['FFTF']
+		
 		request.session['faultsmsg']= envelopdata1['faults_msg']
 		if envelopdata1['faults_msg'] == "nofaults":
 			request.session['faultsmsg'] = 0
@@ -180,7 +181,20 @@ def envelop_upload_csv(request):
 			request.session['faultsmsg'] = 2
 		## Return the data to envelopdata template
 		if envelopdata1['FBPFO'] != "null":
-			return render(request, "csvapp/enveloppeakdetection.html", {"envelopdata":envelopdata3,"enveloping":envelopingdata,'rawdata':rawdata})			
+			freqlist=envelopdata1['fault_status']
+	
+			freqlist1=list(freqlist.keys())
+	
+			for i in range(len(freqlist1)):
+				if freqlist1[i] == "BPFI":
+					freqlist1[i] = "Inner fault detected"
+				if freqlist1[i] == "BPFO":
+					freqlist1[i] = "Outer fault detected"
+				if freqlist1[i] == "BSF":
+					freqlist1[i] = "Ball fault detected"
+				if freqlist1[i] == "FTF":
+					freqlist1[i] = "Cage fault detected"
+			return render(request, "csvapp/enveloppeakdetection.html", {"envelopdata":envelopdata3,"enveloping":envelopingdata,'rawdata':rawdata,'fault_list':freqlist1})			
 	
 		else:
 			return render(request, "csvapp/envelopdata.html", {"envelopdata":envelopdata3,"enveloping":envelopingdata,'rawdata':rawdata})			
@@ -402,6 +416,9 @@ def envelop_upload_withouttime(request):
 	request.session['BPFI']= envelopdata1['BPFI']
 	request.session['BSF']= envelopdata1['BSF']
 	request.session['FTF']= envelopdata1['FTF']
+	
+	
+	
 	request.session['faultsmsg']= envelopdata1['faults_msg']
 	if envelopdata1['faults_msg'] == "nofaults":
 		request.session['faultsmsg'] = 0
@@ -412,7 +429,21 @@ def envelop_upload_withouttime(request):
 		request.session['faultsmsg'] = 2
 	## Return data to envelopdata.html/enveloppeakdetection.html
 	if envelopdata1['FBPFO'] != "null":
-		return render(request, "csvapp/enveloppeakdetection.html", {"envelopdata":envelopdata3,"enveloping":envelopingdata,"rawdata":rawdata})
+		freqlist=envelopdata1['fault_status']
+	
+		freqlist1=list(freqlist.keys())
+	
+		for i in range(len(freqlist1)):
+			if freqlist1[i] == "BPFI":
+				freqlist1[i] = "Inner fault detected"
+			if freqlist1[i] == "BPFO":
+				freqlist1[i] = "Outer fault detected"
+			if freqlist1[i] == "BSF":
+				freqlist1[i] = "Ball fault detected"
+			if freqlist1[i] == "FTF":
+				freqlist1[i] = "Cage fault detected"
+
+		return render(request, "csvapp/enveloppeakdetection.html", {"envelopdata":envelopdata3,"enveloping":envelopingdata,"rawdata":rawdata,"fault_list":freqlist1})
 	else:
 		return render(request, "csvapp/envelopdata.html", {"envelopdata":envelopdata3,"enveloping":envelopingdata,"rawdata":rawdata})
 
