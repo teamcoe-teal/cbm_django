@@ -83,6 +83,12 @@ Plotly.Plots.resize(myDiv);
 Plotly.Plots.resize(enveloping);
 };
 
+
+
+
+var freqlist = {{fault_list | safe}}
+document.getElementById('typeoffault').value=freqlist
+
 var mydata={{ envelopdata | safe}}
 
   var obj = JSON.parse(JSON.stringify(mydata))
@@ -97,81 +103,6 @@ var mydata={{ envelopdata | safe}}
   var fftf = {{request.session.fftf}}
  
 
-
-  if(fbpfo[0]!= null){
-    
-  document.getElementById('bpfo').innerText=fbpfo[0]
-  document.getElementById('typeoffault').value="Outer Fault Detected"
- 
-    
-  
-  }
-  else{
-    
-    var x = document.getElementById("bpfo");
-    var y = document.getElementById("lbpfo1");
-    x.style.display = "none";
-    y.style.display="none";
-  }
-  if(fbpfi[0] != null){
-  document.getElementById('bpfi').innerText=fbpfi[0]
-  var x=document.getElementById('typeoffault').value
-  
-      if(x != ''){
-        
-        var stringval = x +","+ "Inner Fault Detected"
-        document.getElementById('typeoffault').value= stringval
-      }
-    else{
-      
-      document.getElementById('typeoffault').value= "Inner Fault Detected";
-    }
-  }
-  else{
-    
-    var x = document.getElementById("bpfi");
-    var y = document.getElementById("lbpfi1");
-    x.style.display = "none";
-    y.style.display="none";
-
-  }
-  if(fbsf[0]!=null){
-  document.getElementById('bsf').innerText=fbsf[0]
-  var x=document.getElementById('typeoffault').value
-  
-  if(x!=''){
-  var stringval = x + "Ball Fault Detected"
-  document.getElementById('typeoffault').value= stringval
-  }
-  else{
-    document.getElementById('typeoffault').value= "Ball Fault Detected"
-  }
-  }
-  else{
-    var x = document.getElementById("bsf");
-    var y = document.getElementById("lbsf1");
-    x.style.display = "none";
-    y.style.display="none";
-    
-  }
-  if(fftf[0]!=null){
-  document.getElementById('ftf').innerText=fftf[0]
-  var x=document.getElementById('typeoffault').value
-  if(x!=''){
-  var stringval = x + "Cage Fault Detected"
-  document.getElementById('typeoffault').value= stringval
-  }
-  else{
-    document.getElementById('typeoffault').value= "Cage Fault Detected"
-  }
-  }
-  else{
-    var x = document.getElementById("ftf");
-    var y = document.getElementById("lftf1");
-    x.style.display = "none";
-    y.style.display="none";
-  }
-  
   
 
 
