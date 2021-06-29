@@ -24,6 +24,13 @@ api_url ="https://cbmapiteal.azurewebsites.net/csvrestapi/"
 class Home(TemplateView):
 	template_name = "csvapp/home.html"
 
+
+def iiotportal(request):
+	if request.method == "GET":
+	#return HttpResponse()
+		print("1")
+		return render(request, "csvapp/iiotportal.html")
+
 def index(request):
 	if request.method == "POST":
 	#return HttpResponse()
@@ -52,11 +59,18 @@ def upload_csv(request):
        
 		##	Read the csv file using pandas dataframe
 		csv=pd.read_csv(csv_file,error_bad_lines=False)
-		col=csv.columns.tolist()
-		col1=csv.columns.tolist()
+	
+		df = csv.loc[:, ~csv.columns.str.contains('^Unnamed')]
+		df1 = csv.loc[:, ~csv.columns.str.contains(' ')]
+		print(df1)
+		#filtered_data = df.dropna(axis='columns', how='all')
+		#rint(filtered_data)
+		col=df1.columns.tolist()
+		col1=df1.columns.tolist()
 		## Get the column length
 		n=len(col)
 		noofcol=2
+		print(n)
 		for i in range(len(col)):
 			col1[i] = col1[i].lower()
 			if col1[i] == "amplitude":
@@ -65,7 +79,7 @@ def upload_csv(request):
 				timeindex=col[i]
 		iucolnames=['From','To']
 		colnames=['amplitude','time']
-		print(col)
+		
 		if n < 2:
 			messages.error(request,'please upload proper csv file')			
 			return render(request, "csvapp/upload.html", data)
@@ -117,6 +131,7 @@ def upload_csv(request):
 		else:
 			
 			amplitude = df_in_first_api[ampindex]
+			
 			time=df_in_first_api[timeindex]
 			rawdata={"amplitude":amplitude.tolist(),"time":time.tolist()}
 			
@@ -248,8 +263,10 @@ def upload_withouttime(request):
 
 	## 	Read the csv file using pandas dataframe and check for the columns accordingly
 	csv=pd.read_csv(csv_file,error_bad_lines=False) 
-	col=csv.columns.tolist()
-	col1=csv.columns.tolist()
+	df = csv.loc[:, ~csv.columns.str.contains('^Unnamed')]
+	df1 = csv.loc[:, ~csv.columns.str.contains(' ')]
+	col=df1.columns.tolist()
+	col1=df1.columns.tolist()
 	for i in range(len(col)):
 		col1[i] = col1[i].lower()
 		if col1[i] == "amplitude":

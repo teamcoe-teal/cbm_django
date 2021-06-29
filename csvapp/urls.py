@@ -19,6 +19,7 @@ urlpatterns =[
     path('envelop_upload_withouttimenobfc/', envelopsignal.envelop_upload_withouttimenobfc, name = "envelop_upload_withouttimenobfc"),
    
     path('getmodelno/', envelopsignal.getmodelno, name = "getmodelno"),
+    path('iiotportal/', views.iiotportal, name = "iiotportal"),
     
 ]
 

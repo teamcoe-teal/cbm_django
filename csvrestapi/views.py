@@ -41,8 +41,10 @@ def index(request):
         samplingfreq = float(request.data.get("frequency"))
         input_file_json = json.loads(request.data.get('input_file'))
         df_in_second_api = pd.read_json(input_file_json)
-        col=list(df_in_second_api.columns)
-        col1=list(df_in_second_api.columns)
+        df = df_in_second_api.loc[:, ~df_in_second_api.columns.str.contains('^Unnamed')]
+        df1 = df_in_second_api.loc[:, ~df_in_second_api.columns.str.contains(' ')]
+        col=list(df1.columns)
+        col1=list(df1.columns)
        
         for i in range(len(col)):
 	        col1[i] = col1[i].lower()
@@ -54,7 +56,7 @@ def index(request):
 
         # to calculate fft
         
-        amplitude=df_in_second_api[ampindex]
+        amplitude=df1[ampindex]
 
         result = FFT(amplitude,samplingfreq)
         
@@ -169,15 +171,17 @@ def upload_csv(request):
         
         
         df_in_second_api = pd.read_json(input_file_json)
-        col=list(df_in_second_api.columns)
-        col1=list(df_in_second_api.columns)
+        df = df_in_second_api.loc[:, ~df_in_second_api.columns.str.contains('^Unnamed')]
+        df1 = df_in_second_api.loc[:, ~df_in_second_api.columns.str.contains(' ')]
+        col=list(df1.columns)
+        col1=list(df1.columns)
        
         modelno=request.data.get('modelno')
         noofcol = int(request.data.get('noofcol'))
 
         ## drop the null data from the each raw
-        dropnullrowsdf = df_in_second_api.dropna()
-       
+        dropnullrowsdf = df1.dropna()
+        
        ## if noofcol is 3 calculate the time difference of From and To and store 
        ## in another column to get total time
         if noofcol == 3:
@@ -219,7 +223,9 @@ def upload_csv(request):
 		            timeindex=col[i]
 		
             time=dropnullrowsdf[timeindex]
+            
             amplitude=dropnullrowsdf[ampindex]
+            
             num1=time.iloc[-1] - time.iloc[0]
 
 
