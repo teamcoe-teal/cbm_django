@@ -46,9 +46,10 @@ def envelop_upload_csv(request):
         ##  Access the input file from the payload
         input_file_json = json.loads(request.data.get('input_file'))
         df_in_second_api = pd.read_json(input_file_json)
-        
-        col=list(df_in_second_api.columns)
-        col1=list(df_in_second_api.columns)
+        df = df_in_second_api.loc[:, ~df_in_second_api.columns.str.contains('^Unnamed')]
+        df1 = df_in_second_api.loc[:, ~df_in_second_api.columns.str.contains(' ')]
+        col=list(df1.columns)
+        col1=list(df1.columns)
        
         algo=request.data.get('algo')
         f1=request.data.get('f1')
@@ -57,7 +58,7 @@ def envelop_upload_csv(request):
         modelno=request.data.get('modelno')
         noofcol = int(request.data.get('noofcol'))
         ## drop the null data from the each raw
-        dropnullrowsdf = df_in_second_api.dropna()
+        dropnullrowsdf = df1.dropna()
 
         ## if noofcol is 3 calculate the time difference of From and To and store 
         ## in another column to get total time
@@ -100,8 +101,8 @@ def envelop_upload_csv(request):
 	            if col1[i] == "time":
 		            timeindex=col[i]
 		
-            time=df_in_second_api[timeindex]
-            amplitude=df_in_second_api[ampindex]
+            time=df1[timeindex]
+            amplitude=df1[ampindex]
             num1 = time.iloc[-1] - time.iloc[0]
         # to calculate fft
         

@@ -45,8 +45,10 @@ def envelop_upload_csv(request):
        
 		## 	Read the csv file using pandas data frame and check for the columns accordingly
 		csv=pd.read_csv(csv_file,error_bad_lines=False)
-		col=csv.columns.tolist()
-		col1=csv.columns.tolist()
+		df = csv.loc[:, ~csv.columns.str.contains('^Unnamed')]
+		df1 = csv.loc[:, ~csv.columns.str.contains(' ')]
+		col=df1.columns.tolist()
+		col1=df1.columns.tolist()
 		n=len(col)
 		noofcol=2
 		for i in range(len(col)):
@@ -345,9 +347,11 @@ def envelop_upload_withouttime(request):
 
 	## 	Read the csv file using pandas dataframe and check for the columns accordingly
 	csv=pd.read_csv(csv_file,error_bad_lines=False) 
-	col=csv.columns.tolist()
+	df = csv.loc[:, ~csv.columns.str.contains('^Unnamed')]
+	df1 = csv.loc[:, ~csv.columns.str.contains(' ')]
+	col=df1.columns.tolist()
 	
-	col1=csv.columns.tolist()
+	col1=df1.columns.tolist()
 	for i in range(len(col)):
 		col1[i] = col1[i].lower()
 		if col1[i] == "amplitude":
