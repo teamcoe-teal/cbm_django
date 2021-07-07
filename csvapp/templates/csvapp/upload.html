@@ -13,7 +13,7 @@
     <label for="name" class="col-md-3 col-sm-3 col-xs-12 control-label" style="color:white">Choose an Option: </label>
     <div class="col-md-8">
         
-<select name="cars" id="cars">
+<select name="cars" id="csvtype">
  <option value="">Select</option>
   <option value="withtimebfc">Amplitude and Time</option>
   
@@ -58,15 +58,15 @@
 <div class="form-group" id="showmodelno" style="display:none">
 			<label class="col-md-3 control-label" style="color:black">ModelNo:</label>
 				<div class="col-md-6">
-                    <input type="text" name="modelno" id="modelno" required="false" class="form-control">
-				
-                    {% comment %} <select id="modelno" class="form-control" name="modelno" required="false">
+                    {% comment %} <input type="text" name="modelno" id="modelno" required="false" class="form-control"> {% endcomment %}
+                    <select id="modelno" class="form-control" name="modelno" required="false">
                     <option value="">Select</option>
                     <option value="6205-2RS JEM SKF">6205-2RS JEM SKF</option>
                     <option value="6203-2RS JEM SKF">6203-2RS JEM SKF</option>
                     <option value="Rexnord 2115">Rexnord 2115</option>
                     <option value="61804-2RZ SKF">61804-2RZ SKF</option>
-                    </select> {% endcomment %}
+                    <option value="SKF 61804-2Z">SKF 61804-2Z</option>
+                    </select>
 				</div>
 		</div>
 
@@ -156,8 +156,15 @@
         <div class="form-group" id="showmodelno1" style="display:none">
 			<label class="col-md-3 control-label" style="color:black">ModelNo:</label>
 				<div class="col-md-6">
-                    <input type="text" name="modelno" id="modelno1" required="false" class="form-control">
-					
+                    {% comment %} <input type="text" name="modelno" id="modelno1" required="false" class="form-control"> {% endcomment %}
+					<select id="modelno1" class="form-control" name="modelno1" required="false">
+                    <option value="">Select</option>
+                    <option value="6205-2RS JEM SKF">6205-2RS JEM SKF</option>
+                    <option value="6203-2RS JEM SKF">6203-2RS JEM SKF</option>
+                    <option value="Rexnord 2115">Rexnord 2115</option>
+                    <option value="61804-2RZ SKF">61804-2RZ SKF</option>
+                    <option value="SKF 61804-2Z">SKF 61804-2Z</option>
+                    </select>
 				</div>
 		</div>
         
@@ -227,7 +234,7 @@
             alert('{{message}}')
         {% endfor %}
     {% endif %}
-$('select').on('change', function() {
+$('#csvtype').on('change', function() {
       
        var a = $(this).val()
        var b="withtimebfc"
