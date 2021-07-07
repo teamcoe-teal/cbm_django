@@ -71,6 +71,7 @@ def upload_csv(request):
 		n=len(col)
 		noofcol=2
 		print(n)
+		print(col1)
 		for i in range(len(col)):
 			col1[i] = col1[i].lower()
 			if col1[i] == "amplitude":
@@ -85,6 +86,7 @@ def upload_csv(request):
 			return render(request, "csvapp/upload.html", data)
 		##  If the column contains From and To the uploaded file is IU generated file,set the nofocol as 3
 		if n !=2:
+			print("inside not 2")
 			for word in iucolnames:
 				if not word in col:
 					
@@ -274,7 +276,8 @@ def upload_withouttime(request):
 		
 	colnames=['amplitude']	
 	n = len(col)
-
+	print(col)
+	print(n)
 	if n == 0:
 		messages.error(request,'No columns to parse')			
 		return render(request, "csvapp/upload.html", data1)

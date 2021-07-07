@@ -175,7 +175,7 @@ def upload_csv(request):
         df1 = df_in_second_api.loc[:, ~df_in_second_api.columns.str.contains(' ')]
         col=list(df1.columns)
         col1=list(df1.columns)
-       
+        
         modelno=request.data.get('modelno')
         noofcol = int(request.data.get('noofcol'))
 

@@ -432,8 +432,10 @@ def envelop_upload_withouttime(request):
         ## Access the inputfile from payload
         input_file_json = json.loads(request.data.get('input_file'))
         df_in_second_api = pd.read_json(input_file_json)
-        col=list(df_in_second_api.columns)
-        col1=list(df_in_second_api.columns)
+        df = df_in_second_api.loc[:, ~df_in_second_api.columns.str.contains('^Unnamed')]
+        df1 = df_in_second_api.loc[:, ~df_in_second_api.columns.str.contains(' ')]
+        col=list(df1.columns)
+        col1=list(df1.columns)
        
         for i in range(len(col)):
 	        col1[i] = col1[i].lower()
@@ -474,12 +476,13 @@ def envelop_upload_withouttime(request):
                 BSF = BSFval*rpm/60
                 FTF = FTFval*rpm/60
 
+            print(BSF)
             
         # to calculate fft
         
 
         
-        x=df_in_second_api[ampindex]
+        x=df1[ampindex]
 
         #filterresult = FILTER(x,Sfreq,f1,f2,numtaps)
         ## if algorithm selected is hilbert Transform,calculate the envelope signal and FFT of the envelope
